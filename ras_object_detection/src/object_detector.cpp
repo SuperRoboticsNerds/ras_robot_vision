@@ -10,13 +10,14 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include <string>
 #include <sstream>
 
 
 void camImageCallback(const sensor_msgs::Image::ConstPtr &msg){
-	int image_height = msg->heigth;
+	int image_height = msg->height;
 	int image_width = msg->width;
 
 	int step = msg->step;
@@ -25,7 +26,7 @@ void camImageCallback(const sensor_msgs::Image::ConstPtr &msg){
 	image_data = msg->data;	
 }
 
-
+// void to_cv_copy(cv::Mat* cvimg, const sensor_msgs::Image::ConstPtr& img);
 
 void camDepthCallback(const std_msgs::Float32MultiArray &msg){
 
