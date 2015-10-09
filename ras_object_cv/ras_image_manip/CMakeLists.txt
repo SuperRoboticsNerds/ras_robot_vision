@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ras_object_detect)
+project(ras_image_manip)
 find_package(
   catkin REQUIRED COMPONENTS
   cv_bridge
@@ -25,15 +25,15 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
 )
  
-add_executable(object_detect  src/object_detector.cpp)
+add_executable(image_manip  src/image_manip.cpp)
 
-add_dependencies(object_detect
+add_dependencies(image_manip
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
   ${catkin_EXPORTED_TARGETS}
 )
 
  
-target_link_libraries(object_detect
+target_link_libraries(image_manip
   ${roscpp_LIBRARIES}
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
