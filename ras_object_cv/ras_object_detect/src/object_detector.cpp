@@ -23,7 +23,7 @@ void camImageCallback(const sensor_msgs::Image::ConstPtr &msg){
 	int step = msg->step;
 	int *image_data[image_height][step];
 
-	image_data = msg->data;	
+	// image_data = msg->data;	
 }
 
 // void to_cv_copy(cv::Mat* cvimg, const sensor_msgs::Image::ConstPtr& img);
