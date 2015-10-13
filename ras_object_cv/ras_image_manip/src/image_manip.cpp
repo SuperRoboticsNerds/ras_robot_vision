@@ -18,6 +18,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "geometry_msgs/Twist.h"
 
 #include <string>
 #include <sstream>
@@ -36,19 +37,7 @@ void camImageCallback(const sensor_msgs::Image::ConstPtr &msg){
 	// image_data = msg->data;	
 }
 
-// void to_cv_copy(cv::Mat* cvimg, const sensor_msgs::Image::ConstPtr& img);
-
-void camImageRawCallback(const std_msgs::Float32MultiArray &msg){
-
-}
-
-
 void camDepthCallback(const std_msgs::Float32MultiArray &msg){
-
-}
-
-void camColorCallback(const sensor_msgs::Image::ConstPtr &msg){
-
 
 }
 
@@ -62,11 +51,14 @@ public:
 	image_transport::ImageTransport it;
 	image_transport::Subscriber image_sub;
 	image_transport::Publisher image_pub;
+	ros::Publisher cc_pub;
+	double linear_vel;
+	double angular_vel;
 
 	ImageManipulator()
 	: it(n)
 	{
-		image_sub = it.subscribe("/camera/image_raw", 10, &ImageManipulator::imageCb, this);
+		image_sub = it.subscribe("/camera/image_raw", 3, &ImageManipulator::imageCb, this);
 		image_pub = it.advertise("/image_converter/output_video", 1);
 
 		cv::namedWindow(OPENCV_WINDOW);
@@ -157,6 +149,7 @@ public:
 		double maxVal = 0;
 		double minAngle; 
 		double maxAngle;
+		double P = 0.05;
 
 		cv::Point2i minIndex(0,0), maxIndex(0,0);		
 		findMinMax(minVal, maxVal, minIndex, maxIndex, grayimg);
@@ -164,61 +157,61 @@ public:
 		findMinMaxAngle(minAngle, maxAngle, minIndex, maxIndex, grayimg);
 		std::cout << "min index x coordinate: " << minVal << minIndex.x << minIndex.y;
 
-		double linear_vel = 0.0;
-		double angular_vel = 0.0;
-		if(minVal > 39 && minVal < 81){
-			linear_vel = 0.30;
-		} else{
+		linear_vel = 0.0;
+		angular_vel = 0.0;
+		if(minVal < 39 || minVal > 81){
 			linear_vel = 0.0;
+			angular_vel = 0.0;
+		} else {
+			if(fabs(minAngle) > 35){
+				angular_vel = -1 * minAngle *P;
+				linear_vel = 0.20;
+			} else{
+				angular_vel = 0.0;
+				linear_vel = 0.30;
+			}
+
 		}
 
-		if()
 
+		std::cout << "angular velocity is :" << angular_vel << "\n" << "linear velocity is:" << linear_vel;
+
+		cc_pub = n.advertise<geometry_msgs::Twist>("/motor_controller/twist", 10);
+
+		ros::Rate loop_rate(10);
+
+		while(ros::ok()){
+			geometry_msgs::Twist msg;
+
+			msg.linear.x = ImageManipulator::linear_vel;
+			msg.angular.z = ImageManipulator::angular_vel;
+
+			cc_pub.publish(msg);
+			ros::spinOnce();
+
+			loop_rate.sleep();
+		}
+
+		image_pub.publish(cv_ptr->toImageMsg());
 
 	}
-
-
-
 
 };
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int main(int argc, char ** argv){
 
-	ros::init(argc, argv, "object_detector");
+	ros::init(argc, argv, "image_manipulator");
 	// Object_Detector od;
 	ros::NodeHandle n;
 
 	// TODO: put the name of the camera message type. 
-	ros::Subscriber cam_depth_image_raw = n.subscribe("camera/depth/image_raw", 100, &camImageRawCallback);
-	ros::Subscriber cam_depth_image = n.subscribe("camera/depth/image", 100, &camImageCallback);
+	// ros::Subscriber cam_depth_image_raw = n.subscribe("camera/depth/image_raw", 100, &camImageRawCallback);
 	// ros::Subscriber cam_sub_depth_uv = n.subscribe("camera/depth/uv", 100, &camDepthCallback);
-	ros::Subscriber cam_col_image = n.subscribe("camera/color/image_raw", 100, &camColorCallback);
-
-	ros::Rate loop_rate(10);
-
-	while(ros::ok()){
-
-
-		ros::spinOnce();
-		loop_rate.sleep();
-	}
-
+	// ros::Subscriber cam_col_image = n.subscribe("camera/color/image_raw", 100, &camColorCallback);
+	ImageManipulator iman;
+	ros::spin();
+	return 0;
 
 }
