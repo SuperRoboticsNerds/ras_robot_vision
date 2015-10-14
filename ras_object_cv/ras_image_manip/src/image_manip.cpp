@@ -58,7 +58,7 @@ public:
 	ImageManipulator()
 	: it(n)
 	{
-		image_sub = it.subscribe("/camera/image_raw", 3, &ImageManipulator::imageCb, this);
+		image_sub = it.subscribe("/camera/depth/image_raw", 3, &ImageManipulator::imageCb, this);
 		image_pub = it.advertise("/image_converter/output_video", 1);
 
 		cv::namedWindow(OPENCV_WINDOW);

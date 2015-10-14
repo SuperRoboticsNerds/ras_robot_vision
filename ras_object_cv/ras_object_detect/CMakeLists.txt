@@ -25,15 +25,15 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
 )
  
-add_executable(object_detect  src/object_detector.cpp)
+add_executable(object_detector  src/object_detector.cpp)
 
-add_dependencies(object_detect
+add_dependencies(object_detector
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
   ${catkin_EXPORTED_TARGETS}
 )
 
  
-target_link_libraries(object_detect
+target_link_libraries(object_detector
   ${roscpp_LIBRARIES}
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}

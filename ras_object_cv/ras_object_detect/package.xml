@@ -2,7 +2,7 @@
 <package>
   <name>ras_object_detect</name>
   <version>0.0.0</version>
-  <description>The ras_object_lib package</description>
+  <description>The ras_object_detect package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
