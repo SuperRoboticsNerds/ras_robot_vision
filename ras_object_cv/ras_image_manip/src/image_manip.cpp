@@ -58,7 +58,7 @@ public:
 	ImageManipulator()
 	: it(n)
 	{
-		image_sub = it.subscribe("/camera/depth/image_raw", 3, &ImageManipulator::imageCb, this);
+		image_sub = it.subscribe("/camera/depth/image", 3, &ImageManipulator::imageCb, this);
 		image_pub = it.advertise("/image_converter/output_video", 1);
 
 		cv::namedWindow(OPENCV_WINDOW);
@@ -73,8 +73,9 @@ public:
 	void findMinMax(double &minDist, double &maxDist, cv::Point2i &minInd, cv::Point2i &maxInd, cv::Mat &gray_img){
 
 		for(int i = 0; i< gray_img.rows; i++){
-			for(int j = 0; gray_img.cols; j++){
+			for(int j = 0;j < gray_img.cols; j++){
 				int currDist = gray_img.at<uchar>(i,j);
+				// std::cout << "100, 100 values"<< gray_img.at<uchar>(100,100);
 				if (minDist > currDist){
 					minDist = currDist;
 					minInd.x = i;
@@ -90,6 +91,9 @@ public:
 
 			}
 		}
+		// std::cout << "minimumm distance is:" << minDist;
+		// std::cout << "maximum distance is :" << maxDist;
+
 
 	}
 
@@ -104,7 +108,8 @@ public:
 		cv_bridge::CvImagePtr cv_ptr;
 
 		try{
-			cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+			// cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+			cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::TYPE_32FC1);
 		}
 		catch(cv_bridge::Exception& e){
 			ROS_ERROR("cv bridge exception error: %s", e.what());
@@ -114,10 +119,11 @@ public:
 		cv::Mat srcimg = cv_ptr->image;
 		// convert the bgr image into grayscale;
 		cv::Mat grayimg;
-		grayimg = cv::Mat(srcimg.size(), CV_8UC3);
+		grayimg = cv::Mat(srcimg.size(), CV_8UC1);
 
-		cv::cvtColor(srcimg, grayimg, CV_BGR2GRAY);
+		// cv::cvtColor(srcimg, grayimg, CV_BGR2GRAY);
 
+		cv::convertScaleAbs(srcimg, grayimg, 100, 0.0);
 		// int min_val = 0;
 		int index_i = 0;
 		int index_j = 0;
@@ -126,7 +132,7 @@ public:
 		const int MAX_INTENSITY = 255;
 		const int MIN_INTENSITY = 1;
 		int max_thresh = 80;
-		int min_thresh = 1;
+		int min_thresh = 5;
 		int distance = 0;
 
 
@@ -139,31 +145,48 @@ public:
 				}
 
 				if (current_val < min_thresh){
-					grayimg.at<uchar>(i,j) = MIN_INTENSITY;
+					grayimg.at<uchar>(i,j) = MAX_INTENSITY;
 				}	
 
 			}
 		}
 
-		double minVal = 0;
-		double maxVal = 0;
+		double minVal;
+		double maxVal;
 		double minAngle; 
 		double maxAngle;
 		double P = 0.05;
 
-		cv::Point2i minIndex(0,0), maxIndex(0,0);		
-		findMinMax(minVal, maxVal, minIndex, maxIndex, grayimg);
+		cv::Point2i minLoc, maxLoc;
+		// findMinMax(minVal, maxVal, minIndex, maxIndex, grayimg);
 
-		findMinMaxAngle(minAngle, maxAngle, minIndex, maxIndex, grayimg);
-		std::cout << "min index x coordinate: " << minVal << minIndex.x << minIndex.y;
+		cv::minMaxLoc(grayimg, &minVal, &maxVal, &minLoc, &maxLoc);
+
+		findMinMaxAngle(minAngle, maxAngle, minLoc, maxLoc, grayimg);
+		// std::cout << "min index x value: " << minLoc.x ;
+		
 
 		linear_vel = 0.0;
 		angular_vel = 0.0;
-		if(minVal < 39 || minVal > 81){
+
+		// if(minVal >= 31 && minVal < 80){
+		// 	linear_vel = 0.30;
+		// } else{
+		// 	linear_vel = 0;
+		// }
+
+		// if(minLoc.x >= 250  && minLoc.x <= 350){
+		// 	angular_vel = 0;
+		// } else{
+		// 	angular_vel = (250 - minLoc.x) *0.2 ;
+		// }
+
+
+		if(minVal < 01 || minVal > 81){
 			linear_vel = 0.0;
 			angular_vel = 0.0;
 		} else {
-			if(fabs(minAngle) > 35){
+			if(fabs(minAngle) > 15){
 				angular_vel = -1 * minAngle *P;
 				linear_vel = 0.20;
 			} else{
@@ -174,7 +197,11 @@ public:
 		}
 
 
-		std::cout << "angular velocity is :" << angular_vel << "\n" << "linear velocity is:" << linear_vel;
+		std::cout << "angular velocity is :" << angular_vel << "\n" << "linear velocity is:" << linear_vel << "\n";
+
+    	cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+    	cv::imshow( "Contours", grayimg );
+    	cv::waitKey(3);
 
 		cc_pub = n.advertise<geometry_msgs::Twist>("/motor_controller/twist", 10);
 
