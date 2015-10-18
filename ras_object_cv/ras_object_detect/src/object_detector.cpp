@@ -76,7 +76,7 @@ void odCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 	// detector.detect()
 
-	to_cv_copy(&outimg, inimg);
+	ras_cv::to_cv_copy(&outimg, inimg);
 
 	cv::cvtColor(outimg, grayimg, CV_BGR2GRAY);
 	detector.detect(grayimg, key_points);

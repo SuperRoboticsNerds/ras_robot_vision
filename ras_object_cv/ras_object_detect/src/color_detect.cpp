@@ -20,20 +20,20 @@ using namespace std;
 using namespace cv;
 
 static const std::string OPENCV_WINDOW="Color Detection";
-	int iLowH = 170;
- 	int iHighH = 179;
+	int iLowH = 0;
+ 	int iHighH = 255;
 
-	int iLowS = 150; 
+	int iLowS = 0; 
 	int iHighS = 255;
-	int iLowV = 60;
+	int iLowV = 0;
 	int iHighV = 255;
 
 	cv::Mat imgHSV;
 	cv::Mat imgThresholded;
 
-void lowHueCallback(int, void *){
+void varyParamsCallback(int, void *){
 	inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
-	cv::imshow("Thresholded Image", imgThresholded);
+	// cv::imshow("Thresholded Image", imgThresholded);
 
 }
 
@@ -47,13 +47,13 @@ public:
 	// cv::Mat imgHSV;
 	// cv::Mat imgThresholded;
 	// cv::Mat 
-	int iLowH = 170;
- 	int iHighH = 179;
+	// int iLowH = 0;
+ // 	int iHighH = 250;
 
-	int iLowS = 150; 
-	int iHighS = 255;
-	int iLowV = 60;
-	int iHighV = 255;
+	// int iLowS = 0; 
+	// int iHighS = 255;
+	// int iLowV = 0;
+	// int iHighV = 255;
 
 
 	ColorDetectRT()
@@ -102,16 +102,22 @@ public:
 		cv::namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 
 		 //Create trackbars in "Control" window
-		const int lowHueSliderMax = 179;
-		const int highHueSliderMax = 179;
- 		createTrackbar("LowH", "Control", &iLowH, lowHueSliderMax, lowHueCallback); //Hue (0 - 179)
- 		createTrackbar("HighH", "Control", &iHighH, highHueSliderMax, lowHueCallback);
+		const int lowHueSliderMax = 255;
+		const int highHueSliderMax = 255;
+		const int lowSaturationSliderMax = 255;
+		const int highSaturationSliderMax = 255;
+		const int lowValueSliderMax = 255;
+		const int highValueSliderMax = 255;
 
- 		// createTrackbar("LowS", "Control", &iLowS, 255, lowSatCallback); //Saturation (0 - 255)
- 		// createTrackbar("HighS", "Control", &iHighS, 255, highHueCallback);
 
- 		// createTrackbar("LowV", "Control", &iLowV, 255, lowValCallback);//Value (0 - 255)
- 		// createTrackbar("HighV", "Control", &iHighV, 255, highValCallback);
+ 		createTrackbar("LowH", "Control", &iLowH, lowHueSliderMax, varyParamsCallback); //Hue (0 - 179)
+ 		createTrackbar("HighH", "Control", &iHighH, highHueSliderMax, varyParamsCallback);
+
+ 		createTrackbar("LowS", "Control", &iLowS, lowSaturationSliderMax, varyParamsCallback); //Saturation (0 - 255)
+ 		createTrackbar("HighS", "Control", &iHighS, highSaturationSliderMax, varyParamsCallback);
+
+ 		createTrackbar("LowV", "Control", &iLowV, lowValueSliderMax, varyParamsCallback);//Value (0 - 255)
+ 		createTrackbar("HighV", "Control", &iHighV, highValueSliderMax, varyParamsCallback);
 
  		int iLastX = -1; 
  		int iLastY = -1;
@@ -133,12 +139,20 @@ public:
 
     	inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
 
+    	//morphological closing.
+    	cv::erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5,5)));
+    	cv::dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5,5)));
+
+
+    	//morphological closing.
+    	cv::dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5,5)));
+    	cv::erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5,5)));
+
+
     	ros::Rate loop_rate(10);
 
     	// image_pub.publish(cv_ptr->toImageMsg());
-    	// cv::imshow("Thresholded Image", imgThresholded);
-
-
+    	cv::imshow("Thresholded Image", imgThresholded);
 
 	}
 

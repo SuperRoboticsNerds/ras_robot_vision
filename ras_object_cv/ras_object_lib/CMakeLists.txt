@@ -25,6 +25,7 @@ include_directories(
 add_library(ras_object_lib
   src/image_converter.cpp
   src/image_normalise.cpp
+  src/image_morph.cpp
 #  src/image_manip.cpp
 )
  
