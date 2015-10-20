@@ -39,6 +39,22 @@ target_link_libraries(object_detector
   ras_object_lib
 )
 
+
+add_executable(object_detector_test  src/object_detector_test.cpp)
+
+add_dependencies(object_detector_test
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS}
+)
+ 
+target_link_libraries(object_detector_test
+  ${roscpp_LIBRARIES}
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+  ras_object_lib
+)
+
+
 add_executable(color_detect  src/color_detect.cpp)
 
 add_dependencies(color_detect
