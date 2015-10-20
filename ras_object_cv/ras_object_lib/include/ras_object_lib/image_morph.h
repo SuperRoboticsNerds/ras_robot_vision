@@ -37,6 +37,8 @@ cv::Rect get_bounding_box(cv::KeyPoint& point, int width, int height);
 template <typename T>  std::vector<T>  getPointsofLine(const cv::Mat &img, int x_start, int x_end, int y_start, int y_end, int n);
 
 
+
+
 }
 
 

@@ -22,7 +22,11 @@ namespace ras_cv{
 
 	void makeManyWindows(const std::string& windowName, int rows, int cols, int x_start, int x_size, int y_start, int y_size, int x_offset, int y_offset);
 
-	template <typename T> std::string writeAsString(T text);
+	template<typename T> std::string writeAsString(T text);
+
+	template<typename T> std::string writeVectorAsString(std::vector<T>& vec);
+
+	template<typename T> std::string writeMatrixAsString(cv::Mat& mat);
 
 	void  create_windows(
     const std::string &name, 

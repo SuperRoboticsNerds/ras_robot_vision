@@ -11,10 +11,45 @@ template<typename T> std::string ras_cv::writeAsString(T text){
 }
 
 
+template<typename T> std::string ras_cv::writeVectorAsString(std::vector<T>& vec){
+	std::stringstream ss;
+	for(typename std::vector<T>::const_iterator  it = vec.begin(); it != vec.end(); ++it){
+		ss << *it << " ";
+	}
+	return ss.str();
+
+}
+
+
+template<typename T> std::string ras_cv::writeMatrixAsString(cv::Mat& mat){
+	std::stringstream ss;
+	for(int i = 0; i< mat.rows; i++){
+		for(int j = 0; j < mat.cols; j++){
+			ss << mat.at<T>(cv::Point(i,j)) << " ";
+		}
+		ss << std::endl;
+	}
+
+	ss << std::endl;
+
+	return ss.str();
+}
+
+
+template std::string ras_cv::writeVectorAsString<cv::Vec3b>(cv::vector<cv::Vec3b> & vector);
+
+
+// template<typename T> std::string ras_cv::
+
+
 template std::string ras_cv::writeAsString(int text);
 template std::string ras_cv::writeAsString(double text);
 template std::string ras_cv::writeAsString(float text);
 template std::string ras_cv::writeAsString(long text);
+
+template std::string ras_cv::writeMatrixAsString<cv::Vec3b>(cv::Mat& mat);
+template std::string ras_cv::writeMatrixAsString<uchar>(cv::Mat& mat);
+
 
 void ras_cv::create_windows(
     const std::string &name, 
