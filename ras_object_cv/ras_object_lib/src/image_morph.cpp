@@ -29,10 +29,11 @@ void ras_cv::morph_tranform(cv::Mat& src, cv::Mat& dst, const std::string & morp
 
 
 cv::Rect  ras_cv::get_bounding_box(cv::KeyPoint& point, int width, int height){
-	int x1_ = std::max(0, (int) point.pt.x -  width);
-	int x2_ = std::min(width - 1, (int) point.pt.x + width);
-	int y1_ = std::max(0, (int) point.pt.y - height);
-	int y2_ = std::min(height - 1,(int) point.pt.y + height);
+	int size = (int) point.size;
+	int x1_ = std::max<int>(0, (int) point.pt.x -  size);
+	int x2_ = std::min<int>(width - 1, (int) point.pt.x + size);
+	int y1_ = std::max<int>(0, (int) point.pt.y - size);
+	int y2_ = std::min<int>(height - 1,(int) point.pt.y + size);
 
 	return cv::Rect(x1_, y1_, x2_ - x1_, y2_ - y1_);
 

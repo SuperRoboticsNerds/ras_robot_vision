@@ -18,6 +18,11 @@ static const std::string ERODE = "erode";
 static const std::string DILATE = "dilate";
 static const std::string OPEN = "open";
 static const std::string CLOSE = "close";
+static const std::string NO_MORPH = "no_morph";
+
+// static const int MORPH_RECT = cv::MORPH_RECT;
+// static const int MORPH_ELLIPSE = cv::MORPH_ELLIPSE;
+// static const int MORPH_CROSS = cv::MORPH_CROSS;
 
 
 
