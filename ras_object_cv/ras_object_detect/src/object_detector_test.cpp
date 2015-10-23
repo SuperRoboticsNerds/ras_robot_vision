@@ -46,10 +46,10 @@ const int LOOP_RATE=10;
 const int MAX_BUFFER= 5;
 
 bool color_tune = false;
-bool blob_tune = true;
-bool morph_tune = true;
+bool blob_tune = false;
+bool morph_tune = false;
 bool blur_tune = false;
-std::string blur_type = BLUR_GAUSSIAN;
+std::string blur_type = BLUR_NORMAL;
 std::string color_tune_type="hue";
 int hl_def = 0;
 int hh_def = 255;
@@ -60,8 +60,8 @@ int sh_def = 255;
 
 bool tranform_to_hsv = true;
 std::string morph_type = ras_cv::NO_MORPH;
-std::string color=ras_cv::ORANGE;
-// std::string color=ras_cv::GREEN_FL;
+// std::string color=ras_cv::VIOLET;
+std::string color=ras_cv::YELLOW;
 // std::string blur_type = BLUR_NORMAL;
 int morph_size = 5;
 int blur_size = 5;
@@ -77,10 +77,10 @@ bool filter_ratio = false;
 bool filter_by_area = true;
 bool filter_by_convexity = true;
 
-int min_circularity = 25;
+int min_circularity = 15;
 // int min_inertia = 55;
-int min_convexity = 35;
-int min_inertia_ratio = 25;
+int min_convexity = 15;
+int min_inertia_ratio = 15;
 
 
 int min_distance_between_blobs= 50;
@@ -164,6 +164,8 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 		ras_cv::thresholdColor(hsv_img, thres_img, color);
 	}
 
+	thres_img =  cv::Scalar(255, 255, 255) - thres_img;
+
 	cv::SimpleBlobDetector detector(params);
 	detector.detect(thres_img, key_points);
 
@@ -183,8 +185,8 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 	}
 
-  	// cv::imshow(WINDOW_NAME, fin_img);
   	cv::imshow(WINDOW_NAME, fin_img);
+  	// cv::imshow(WINDOW_NAME, thres_img);
   	cv::waitKey(1);
 	// Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
 
@@ -232,18 +234,19 @@ int main(int argc, char ** argv){
 	ros::Rate loop_rate(LOOP_RATE);
 
 
-	node.param("morph_tune", morph_tune, false);
-	node.param<std::string>("morph_type", morph_type, ras_cv::DILATE);
-	node.param("blur_tune", blur_tune, false);
-	node.param<std::string>("blur_type", blur_type, BLUR_NORMAL);
-	node.param("color_tune", color_tune, false);
-	node.param<std::string>("color", color, ras_cv::BLUE_DARK);
-	node.param("convert_to_hsv", tranform_to_hsv, false);
-	node.param("blob_tune", blob_tune, true);
-	node.param("color_tune_type", color_tune_type, ras_cv::RAS_CV_HUE);
+	// node.param("morph_tune", morph_tune, true);
+	// node.param<std::string>("morph_type", morph_type, ras_cv::DILATE);
+	// node.param("blur_tune", blur_tune, true);
+	// node.param<std::string>("blur_type", blur_type, BLUR_NORMAL);
+	// node.param("color_tune", color_tune, false);
+	// node.param<std::string>("color", color, ras_cv::BLUE_DARK);
+	// node.param("convert_to_hsv", tranform_to_hsv, true);
+	// node.param("blob_tune", blob_tune, true);
+	// node.param("color_tune_type", color_tune_type, ras_cv::RAS_CV_HUE);
 
 
 	bool morph_tune = true;
+	// bool color_tune = true;
 
 	
 	if(blob_tune){
@@ -269,26 +272,26 @@ int main(int argc, char ** argv){
 		}
 	}
 
-		// cv::createTrackbar("HL", TRACKBAR_WINDOW, &hl_def, 180, NULL);
-		// cv::createTrackbar("HH", TRACKBAR_WINDOW, &hh_def, 180, NULL);
-		// cv::createTrackbar("SL", TRACKBAR_WINDOW, &sl_def, 255, NULL);
-		// cv::createTrackbar("SH", TRACKBAR_WINDOW, &sh_def, 255, NULL);
-		// cv::createTrackbar("VL", TRACKBAR_WINDOW, &vl_def, 255, NULL);
-		// cv::createTrackbar("VH", TRACKBAR_WINDOW, &vh_def, 255, NULL);
+		cv::createTrackbar("HL", TRACKBAR_WINDOW, &hl_def, 180, NULL);
+		cv::createTrackbar("HH", TRACKBAR_WINDOW, &hh_def, 180, NULL);
+		cv::createTrackbar("SL", TRACKBAR_WINDOW, &sl_def, 255, NULL);
+		cv::createTrackbar("SH", TRACKBAR_WINDOW, &sh_def, 255, NULL);
+		cv::createTrackbar("VL", TRACKBAR_WINDOW, &vl_def, 255, NULL);
+		cv::createTrackbar("VH", TRACKBAR_WINDOW, &vh_def, 255, NULL);
 
 
-	if(color_tune){
-		if(color_tune_type == "hue"){
-			cv::createTrackbar("HL", TRACKBAR_WINDOW, &hl_def, 180, NULL);
-			cv::createTrackbar("HH", TRACKBAR_WINDOW, &hh_def, 255, NULL);
-		} else if(color_tune_type == "sat"){
-			cv::createTrackbar("SL", TRACKBAR_WINDOW, &sl_def, 50, NULL);
-			cv::createTrackbar("SH", TRACKBAR_WINDOW, &sh_def, 255, NULL);
-		} else if(color_tune_type == "val"){
-			cv::createTrackbar("VL", TRACKBAR_WINDOW, &vl_def, 50, NULL);
-			cv::createTrackbar("VH", TRACKBAR_WINDOW, &vh_def, 255, NULL);
-		}
-	}
+	// if(color_tune){
+	// 	if(color_tune_type == "hue"){
+	// 		cv::createTrackbar("HL", TRACKBAR_WINDOW, &hl_def, 180, NULL);
+	// 		cv::createTrackbar("HH", TRACKBAR_WINDOW, &hh_def, 255, NULL);
+	// 	} else if(color_tune_type == "sat"){
+	// 		cv::createTrackbar("SL", TRACKBAR_WINDOW, &sl_def, 50, NULL);
+	// 		cv::createTrackbar("SH", TRACKBAR_WINDOW, &sh_def, 255, NULL);
+	// 	} else if(color_tune_type == "val"){
+	// 		cv::createTrackbar("VL", TRACKBAR_WINDOW, &vl_def, 50, NULL);
+	// 		cv::createTrackbar("VH", TRACKBAR_WINDOW, &vh_def, 255, NULL);
+	// 	}
+	// }
 
 	ros::spin();
 	return 0;
