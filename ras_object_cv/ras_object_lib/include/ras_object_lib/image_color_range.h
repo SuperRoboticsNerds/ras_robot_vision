@@ -30,28 +30,28 @@ namespace ras_cv{
 	// static const  cv::Scalar BLUE_LIGHT_HIGH = cv::Scalar(105, 120, 120);
 	
 
-	static const  cv::Scalar BLUE_LIGHT_LOW = cv::Scalar(85, 135, 160);
-	static const  cv::Scalar BLUE_LIGHT_HIGH = cv::Scalar(110, 245, 255);
+	static const  cv::Scalar BLUE_LIGHT_LOW = cv::Scalar(85, 45, 55);
+	static const  cv::Scalar BLUE_LIGHT_HIGH = cv::Scalar(110, 255, 255);
 
 
 	// static const  cv::Scalar BLUE_DARK_LOW = cv::Scalar(97, 80, 90);
 	// static const  cv::Scalar  BLUE_DARK_HIGH = 	cv::Scalar(115, 105, 120);
 
-	static const  cv::Scalar BLUE_DARK_LOW = cv::Scalar(95, 150, 90);
-	static const  cv::Scalar  BLUE_DARK_HIGH = 	cv::Scalar(118, 220, 165);
+	static const  cv::Scalar BLUE_DARK_LOW = cv::Scalar(70, 30, 30);
+	static const  cv::Scalar  BLUE_DARK_HIGH = 	cv::Scalar(130, 250, 250);
 
 
 	// static const cv::Scalar GREEN_DARK_LOW = cv::Scalar(54, 108, 100);
 	// static const cv::Scalar GREEN_DARK_HIGH = cv::Scalar(65, 155, 140);
-	static const cv::Scalar GREEN_DARK_LOW = cv::Scalar(54, 140, 0);
-	static const cv::Scalar GREEN_DARK_HIGH = cv::Scalar(65, 255, 100);
+	static const cv::Scalar GREEN_DARK_LOW = cv::Scalar(40, 30, 30);
+	static const cv::Scalar GREEN_DARK_HIGH = cv::Scalar(75, 255, 255);
 
 
 	// static const cv::Scalar GREEN_FL_LOW = cv::Scalar(29, 145, 165);
 	// static const cv::Scalar GREEN_FL_HIGH = cv::Scalar(65, 255, 255);
 
-	static const cv::Scalar GREEN_FL_LOW = cv::Scalar(29, 55, 125);
-	static const cv::Scalar GREEN_FL_HIGH = cv::Scalar(65, 225, 255);
+	static const cv::Scalar GREEN_FL_LOW = cv::Scalar(29, 55, 85);
+	static const cv::Scalar GREEN_FL_HIGH = cv::Scalar(65, 255, 255);
 // from gmm model
 	// static const cv::Scalar VIOLET_LOW = cv::Scalar(138, 55, 90);
 	// static const cv::Scalar VIOLET_HIGH = cv::Scalar(165, 100, 150);
@@ -61,11 +61,11 @@ namespace ras_cv{
 
 	// static const cv::Scalar YELLOW_LOW = cv::Scalar(14, 165, 185);
 	// static const cv::Scalar YELLOW_HIGH = cv::Scalar(30, 195, 225);
-	static const cv::Scalar YELLOW_LOW = cv::Scalar(14, 165, 165);
-	static const cv::Scalar YELLOW_HIGH = cv::Scalar(30, 255, 255);
+	static const cv::Scalar YELLOW_LOW = cv::Scalar(10, 160, 160);
+	static const cv::Scalar YELLOW_HIGH = cv::Scalar(40, 255, 255);
 
-	static const cv::Scalar ORANGE_LOW = cv::Scalar(5, 125, 125);
-	static const cv::Scalar ORANGE_HIGH = cv::Scalar(26, 250, 255);
+	static const cv::Scalar ORANGE_LOW = cv::Scalar(0, 150, 160);
+	static const cv::Scalar ORANGE_HIGH = cv::Scalar(40, 255, 255);
 
 	// static const cv::Scalar RED_LOW = cv::Scalar(162, 170, 135);
 	// static const cv::Scalar RED_HIGH = cv::Scalar(185, 225, 220);
@@ -78,9 +78,6 @@ namespace ras_cv{
 
 
 }
-
-
-
 
 
 

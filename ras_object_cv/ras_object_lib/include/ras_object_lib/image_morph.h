@@ -33,6 +33,8 @@ void morph_tranform(cv::Mat& src, cv::Mat& dst, const std::string & morph_tr_typ
 
 cv::Rect get_bounding_box(cv::KeyPoint& point, int width, int height);
 
+cv::Rect get_bounding_box(cv::KeyPoint& point, int width, int height, float scaling);
+
 
 template <typename T>  std::vector<T>  getPointsofLine(const cv::Mat &img, int x_start, int x_end, int y_start, int y_end, int n);
 

@@ -26,7 +26,7 @@ namespace ras_cv{
 
 	template<typename T> std::string writeVectorAsString(std::vector<T>& vec);
 
-	template<typename T> std::string writeMatrixAsString(cv::Mat& mat);
+	template<typename T> std::string writeMatrixAsString(const cv::Mat& mat);
 
 	void  create_windows(
     const std::string &name, 

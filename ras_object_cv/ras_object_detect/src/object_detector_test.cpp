@@ -60,8 +60,8 @@ int sh_def = 255;
 
 bool tranform_to_hsv = true;
 std::string morph_type = ras_cv::NO_MORPH;
-// std::string color=ras_cv::VIOLET;
 std::string color=ras_cv::YELLOW;
+// std::string color=ras_cv::RED;
 // std::string blur_type = BLUR_NORMAL;
 int morph_size = 5;
 int blur_size = 5;
@@ -102,6 +102,7 @@ static const int Y_OFF = 0;
 void colorTuneCallback(){
 
 }
+
 
 void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
@@ -173,12 +174,18 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	cv::drawKeypoints(thres_img, key_points, fin_img, ras_cv::SCALAR_RED,  cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
 
-	std::cout << "Number of detected key points:" << key_points.size() << "\n";
+	// std::cout << "Number of detected key points:" << key_points.size() << "\n";
+
+
+	if(key_points.size() >= 1){
+		std::cout <<
+		ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
+		<< std::endl;
+
+	}
 
 	for(int i =0; i < key_points.size(); i++){
-		// ras_cv::get_bounding_box(key_points[i], 11, 11);
-		std::cout << "yaya";
-		// cv::imshow(
+
    		cv::imshow(
         POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
         pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows)));
@@ -188,37 +195,15 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
   	cv::imshow(WINDOW_NAME, fin_img);
   	// cv::imshow(WINDOW_NAME, thres_img);
   	cv::waitKey(1);
-	// Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
 
 }
 
 
 
-// class Object_Detection_Tune{
-
-// public:
-// 	ros::NodeHandle n_;
-// 	image_transport::Subscriber image_sub; 
-
-
-// 	Object_Detection_Tune()
-// 	: it(n)
-// 	{
-// 		image_sub = it.subscribe("/camera/rgb/image_raw", MAX_BUFFER, &Object_Detection_Tune:callback, this);
-		// image_pub = it.advertise("/image_converter/output_video", 1);
-// 		cv::NamedWindow(WINDOW_NAME);
-
-// 	}
-
-// };
-
-
-
 int main(int argc, char ** argv){
 
-	cout << "Hello People";	
+	// cout << "Hello People";	
 	
-	// cv::namedWindow(WINDOW_NAME);
 
 	ras_cv::create_windows(POINT_WINDOW_NAME, ROWS, COLS, X_START, Y_START, X_SIZE, Y_SIZE, X_OFF, Y_OFF);
 	cv::namedWindow(WINDOW_NAME, CV_WINDOW_AUTOSIZE);

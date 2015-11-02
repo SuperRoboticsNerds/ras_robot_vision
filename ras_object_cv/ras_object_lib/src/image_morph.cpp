@@ -38,6 +38,17 @@ cv::Rect  ras_cv::get_bounding_box(cv::KeyPoint& point, int width, int height){
 	return cv::Rect(x1_, y1_, x2_ - x1_, y2_ - y1_);
 
 }
+
+cv::Rect  ras_cv::get_bounding_box(cv::KeyPoint& point, int width, int height, float scaling){
+	int size = (int) point.size;
+	int x1_ = std::max<int>(0, (int) point.pt.x -  (scaling)*size);
+	int x2_ = std::min<int>(width - 1, (int) point.pt.x + (scaling) *size);
+	int y1_ = std::max<int>(0, (int) point.pt.y - (scaling) *size);
+	int y2_ = std::min<int>(height - 1,(int) point.pt.y + (scaling) *size);
+
+	return cv::Rect(x1_, y1_, x2_ - x1_, y2_ - y1_);
+
+}
  
 
 
