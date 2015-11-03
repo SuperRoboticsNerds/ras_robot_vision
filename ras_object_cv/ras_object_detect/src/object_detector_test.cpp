@@ -60,7 +60,9 @@ int sh_def = 255;
 
 bool tranform_to_hsv = true;
 std::string morph_type = ras_cv::NO_MORPH;
-std::string color=ras_cv::YELLOW;
+std::string color=ras_cv::GREEN_DARK;
+std::vector<std::string> object_colors;
+
 // std::string color=ras_cv::RED;
 // std::string blur_type = BLUR_NORMAL;
 int morph_size = 5;
@@ -86,6 +88,7 @@ int min_inertia_ratio = 15;
 int min_distance_between_blobs= 50;
 cv::SimpleBlobDetector::Params params;
 cv::Mat thres_img;
+std::vector<cv::Mat> thres_imgs;
 std::vector<cv::KeyPoint> key_points;
 
 
@@ -159,19 +162,39 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	}
 
 
+	cv::Mat thres_img_3;
 	if(color_tune){
 		cv::inRange(hsv_img, cv::Scalar(hl_def, sl_def, vl_def), cv::Scalar(hh_def, sh_def, vh_def), thres_img);
 	}else{
 		ras_cv::thresholdColor(hsv_img, thres_img, color);
+		cv::cvtColor(thres_img, thres_img_3, CV_GRAY2BGR);
 	}
 
+	cv::Mat t1img[8];
+	int cnt = 0;
+	cv::Mat fin_thres_img;
+	// cv::Mat fin_img;
+	fin_thres_img = thres_img_3;
+	cv::Mat thres_img_3_temp;
+
+	for(std::vector<string>::iterator it = object_colors.begin(); it != object_colors.end(); ++it){
+		ras_cv::thresholdColor(hsv_img, t1img[cnt], *it);
+		cv::cvtColor(t1img[cnt], thres_img_3_temp, CV_GRAY2BGR);
+		// cv::cvtColor(t1img[cnt], t1img[cnt], CV_GRAY2BGR);
+		cnt++;
+		cv::bitwise_or(fin_thres_img, thres_img_3_temp, fin_thres_img);
+	}
+
+
+
 	thres_img =  cv::Scalar(255, 255, 255) - thres_img;
+	fin_thres_img = cv::Scalar(255, 255, 255) - fin_thres_img;
 
 	cv::SimpleBlobDetector detector(params);
-	detector.detect(thres_img, key_points);
+	detector.detect(fin_thres_img, key_points);
 
 
-	cv::drawKeypoints(thres_img, key_points, fin_img, ras_cv::SCALAR_RED,  cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+	cv::drawKeypoints(fin_thres_img, key_points, fin_img, ras_cv::SCALAR_RED,  cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
 
 	// std::cout << "Number of detected key points:" << key_points.size() << "\n";
@@ -210,6 +233,17 @@ int main(int argc, char ** argv){
   	cv::moveWindow(WINDOW_NAME, 400, 250);
   	cv::namedWindow(TRACKBAR_WINDOW, CV_WINDOW_NORMAL);
   	cv::moveWindow(TRACKBAR_WINDOW, 1050, 250);
+
+  	// fill the vector of colors
+  	object_colors.push_back(ras_cv::GREEN_DARK);
+  	object_colors.push_back(ras_cv::GREEN_FL);
+  	object_colors.push_back(ras_cv::BLUE_DARK);
+  	object_colors.push_back(ras_cv::BLUE_LIGHT);
+  	object_colors.push_back(ras_cv::RED);
+  	object_colors.push_back(ras_cv::VIOLET);
+  	object_colors.push_back(ras_cv::YELLOW);
+  	object_colors.push_back(ras_cv::ORANGE);
+
 	
 	ros::init(argc, argv, "object_detection_tune");
 
@@ -282,4 +316,3 @@ int main(int argc, char ** argv){
 	return 0;
 
 }
-
