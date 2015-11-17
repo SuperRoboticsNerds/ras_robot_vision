@@ -28,6 +28,9 @@ namespace ras_cv{
 
 	template<typename T> std::string writeMatrixAsString(const cv::Mat& mat);
 
+    int argmax(int* arr, int size);
+    int maxval(int* arr, int size);
+
 	void  create_windows(
     const std::string &name, 
     int rows, 

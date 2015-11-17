@@ -7,4 +7,6 @@
 namespace ras_cv{
 	void to_cv_copy(cv::Mat* cvimg, const sensor_msgs::Image::ConstPtr& img);
 
+	void to_ros_copy(const cv::Mat& cvimg, sensor_msgs::ImagePtr& img);
+
 }

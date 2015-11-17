@@ -14,11 +14,37 @@
 
 namespace ras_cv{
 
+
+const int shape_count = 7;
+
 static const std::string ERODE = "erode";
 static const std::string DILATE = "dilate";
 static const std::string OPEN = "open";
 static const std::string CLOSE = "close";
 static const std::string NO_MORPH = "no_morph";
+
+static const std::string BLUR_NORMAL = "blur";
+static const std::string BLUR_MEDIAN = "median";
+static const std::string BLUR_GAUSSIAN = "gaussian";
+static const std::string BLUR_NO = "no";
+
+
+static const std::string STAR = "star";
+static const std::string PRISM = "prism";
+static const std::string CUBE = "cube";
+static const std::string HOLLOW_CUBE = "hcube";
+static const std::string CROSS = "cross";
+static const std::string SPHERE = "sphere";
+static const std::string CYLINDER = "cylinder";
+
+std::string shape_list[] = {STAR, PRISM, CUBE, HOLLOW_CUBE, CROSS, SPHERE, CYLINDER};
+
+std::map<std::string, int>  shapemap = {{STAR, 0}, {PRISM, 1}, {CUBE, 2}, {HOLLOW_CUBE, 3}, {CROSS, 4}, {SPHERE, 5}, {CYLINDER, 6}};
+
+
+
+
+// static const std::string 
 
 // static const int MORPH_RECT = cv::MORPH_RECT;
 // static const int MORPH_ELLIPSE = cv::MORPH_ELLIPSE;
@@ -39,18 +65,35 @@ cv::Rect get_bounding_box(cv::KeyPoint& point, int width, int height, float scal
 template <typename T>  std::vector<T>  getPointsofLine(const cv::Mat &img, int x_start, int x_end, int y_start, int y_end, int n);
 
 
+class Blur{
+public:
+	int grid_x = 5;
+	int grid_y = 5;
 
+	double sigma_x = 3.0;
+
+	Blur(int grid_x, int grid_y, double sigma_x){
+		grid_x = grid_x;
+		grid_y = grid_y;
+		sigma_x = sigma_x;
+	}
+
+
+
+
+};
+
+
+
+// class BlurParams(){
+
+// }
+
+
+
+void blur(cv::Mat &src, cv::Mat &dst, const std::string &blur_type, const Blur bv);
 
 }
 
-
-
-
-
-
 #endif
-
-
-
-
 

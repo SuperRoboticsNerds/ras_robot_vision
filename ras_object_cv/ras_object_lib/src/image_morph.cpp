@@ -39,6 +39,7 @@ cv::Rect  ras_cv::get_bounding_box(cv::KeyPoint& point, int width, int height){
 
 }
 
+
 cv::Rect  ras_cv::get_bounding_box(cv::KeyPoint& point, int width, int height, float scaling){
 	int size = (int) point.size;
 	int x1_ = std::max<int>(0, (int) point.pt.x -  (scaling)*size);
@@ -48,8 +49,24 @@ cv::Rect  ras_cv::get_bounding_box(cv::KeyPoint& point, int width, int height, f
 
 	return cv::Rect(x1_, y1_, x2_ - x1_, y2_ - y1_);
 
-}
+}	
  
+
+void ras_cv::blur(cv::Mat &src, cv::Mat &dst, const std::string &blur_type, const Blur bv){
+	if(blur_type == ras_cv::BLUR_NORMAL){
+		cv::blur(src, dst, cv::Size(bv.grid_y, bv.grid_x));
+	} else if(blur_type == ras_cv::BLUR_GAUSSIAN){
+		cv::GaussianBlur(src, dst, cv::Size(bv.grid_y, bv.grid_x), bv.sigma_x);
+	} else if(blur_type == ras_cv::BLUR_MEDIAN){
+		cv::medianBlur(src, dst, bv.grid_x);
+	} else {
+		dst = src;
+	}
+
+
+}
+
+
 
 
 template <typename T>  std::vector<T> ras_cv::getPointsofLine(const cv::Mat &img, int x_start, int x_end, int y_start, int y_end, int n){
