@@ -31,6 +31,8 @@ namespace ras_cv{
     int argmax(int* arr, int size);
     int maxval(int* arr, int size);
 
+    int findHoughCircles(cv::Mat& img, int threshold1, int threshold2);
+
 	void  create_windows(
     const std::string &name, 
     int rows, 

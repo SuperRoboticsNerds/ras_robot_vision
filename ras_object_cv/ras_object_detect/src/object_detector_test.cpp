@@ -65,7 +65,8 @@ int sh_def = 255;
 int global_counter = 0;
 
 bool tranform_to_hsv = true;
-std::string morph_type = ras_cv::NO_MORPH;
+std::string morph_type_1 = ras_cv::CLOSE;
+std::string morph_type_2 = ras_cv::OPEN;
 std::string color=ras_cv::GREEN_DARK;
 std::vector<std::string> object_colors;
 
@@ -96,6 +97,9 @@ std::list<int> votelist;
 
 
 int min_distance_between_blobs= 50;
+
+int hough_threshold1 = 130;
+int hough_threshold2 = 30;
 cv::SimpleBlobDetector::Params params;
 cv::Mat thres_img;
 std::vector<cv::Mat> thres_imgs;
@@ -137,7 +141,7 @@ ras_object_lib::Image_Transfer  transferImage(const cv::Mat& cvimg){
 void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 	params.minThreshold = 10;
-	params.maxThreshold = 200;
+	params.maxThreshold = 170;
 
 	params.minDistBetweenBlobs = min_distance_between_blobs;
 	params.filterByArea = filter_by_area;
@@ -186,7 +190,9 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 	ras_cv::blur(pr_img, blurred_img, blur_type, blur_params);
 
-	ras_cv::morph_tranform(blurred_img, morphed_img, morph_type, cv::MORPH_RECT, morph_size);
+	ras_cv::morph_tranform(blurred_img, morphed_img, ras_cv::OPEN, cv::MORPH_RECT, morph_size);
+	ras_cv::morph_tranform(blurred_img, morphed_img, morph_type_1, cv::MORPH_RECT, morph_size);
+	ras_cv::morph_tranform(blurred_img, morphed_img, morph_type_2, cv::MORPH_RECT, morph_size);
 	// detector.detect(grayimg, key_points);
 
 	if(tranform_to_hsv){
@@ -251,11 +257,21 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
   	cv::imshow(WINDOW_NAME, fin_img);
 
 
+  	// find the number of hough circles
+  	// cv::Mat houghimg = ras_cv::get_bounding_box();
+
+
   	for(int i =0; i < key_points.size(); i++){
 
    		cv::imshow(
         POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
-        pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows)));
+        pr_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows)));
+
+        cv::Mat houghimg = hsv_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows, 2.50));
+        int numCircles = ras_cv::findHoughCircles(houghimg, hough_threshold1, hough_threshold2);
+        if(numCircles >= 1){
+        	std::cout << "circle detected; either red ball or yellow ball";
+        }
 
         ras_object_lib::Image_Transfer  it = transferImage(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 0.60)));
         ras_object_lib::Image_Transfer  it_shape = transferImage(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 1.50)));
@@ -296,6 +312,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         		}
 
         	}
+
 
         	int number = atoi(it.response.str.c_str());
         	// it.response.str << number;

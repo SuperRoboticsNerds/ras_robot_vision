@@ -59,6 +59,18 @@ int ras_cv::argmax(int* arr, int size){
 }
 
 
+
+int ras_cv::findHoughCircles(cv::Mat& img, int threshold1, int threshold2){
+  std::vector<cv::Vec3f> circles;
+  cv::Mat hsv_channels[3];
+  cv::split(img, hsv_channels);
+  cv::Mat grayimg = hsv_channels[1];
+  cv::HoughCircles(grayimg, circles, CV_HOUGH_GRADIENT, 1, 25, threshold1, threshold2, 0, 0);
+  return circles.size();
+
+}
+
+
 int ras_cv::maxval(int* arr, int size){
   if(size == 0){
     return 0;
@@ -75,6 +87,9 @@ int ras_cv::maxval(int* arr, int size){
   return max;
 
 }
+
+
+
 
 
 // template<typename T> std::string ras_cv::
