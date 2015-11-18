@@ -91,6 +91,22 @@ target_link_libraries(shape_detector
 )
 
 
+add_executable(object_speaker  src/object_speaker.cpp)
+
+
+add_dependencies(object_speaker
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS}
+)
+
+
+target_link_libraries(object_speaker
+  ${roscpp_LIBRARIES}
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+  ras_object_lib
+)
+
 add_executable(color_detect  src/color_detect.cpp)
 
 add_dependencies(color_detect
