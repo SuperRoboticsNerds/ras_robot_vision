@@ -70,6 +70,9 @@ std::string morph_type_2 = ras_cv::OPEN;
 std::string color=ras_cv::GREEN_DARK;
 std::vector<std::string> object_colors;
 
+
+
+// morphing params
 double sigma = 5.0;
 // std::string color=ras_cv::RED;
 // std::string blur_type = BLUR_NORMAL;
@@ -93,15 +96,20 @@ int min_convexity = 15;
 int min_inertia_ratio = 15;
 bool detect_all = true;
 int votes[7] = {0};
+int shape_votes[7] = {0};
 std::list<int> votelist;
+std::list<int> shapevotelist;
 
 
-int min_distance_between_blobs= 50;
+int min_distance_between_blobs= 60;
 
+
+// params for hough circles 
 int hough_threshold1 = 130;
 int hough_threshold2 = 30;
 cv::SimpleBlobDetector::Params params;
 cv::Mat thres_img;
+
 std::vector<cv::Mat> thres_imgs;
 std::vector<cv::KeyPoint> key_points;
 
@@ -110,6 +118,7 @@ ros::ServiceClient client_color;
 ros::ServiceClient client_shape;
 ros::ServiceClient client_material;
 ros::Publisher object_pub;
+
 
 
 static const int ROWS = 1;
@@ -122,20 +131,81 @@ static const int X_OFF = 5;
 static const int Y_OFF = 0;
 
 
+cv::Mat ros_depth_img;
+
 void colorTuneCallback(){
+
 
 }
 
 
-ras_object_lib::Image_Transfer  transferImage(const cv::Mat& cvimg){
+ras_object_lib::Image_Transfer  transferImage(const cv::Mat& cvimg, int bw){
 	sensor_msgs::ImagePtr rosimg;
-	ras_cv::to_ros_copy(cvimg, rosimg);
+	ras_cv::to_ros_copy(cvimg, rosimg, bw);
 	ras_object_lib::Image_Transfer imgtransfer;
 	imgtransfer.request.im = *rosimg;
 	return imgtransfer;
 }
 
 
+void sendMessageToSpeaker(int col_index, int object_index, int shape_index){
+	ras_msgs::Object_id oid;
+    oid.object = object_index;
+    oid.color = col_index;
+    oid.shape = shape_index;
+    oid.time = 1000;
+    oid.x = 1;
+    oid.y = 10;
+    object_pub.publish(oid);
+
+}
+
+
+int decisiontree(int color_index, int shape_index ){
+	// check if it is a circle/spehere
+	int object_index = 100;
+
+	if(shape_index == 1){
+		if(color_index != 6 && color_index != 3){
+			// red  ball
+			object_index = 6;
+		}else{
+			// yellow ball
+			object_index = 11; 
+			return object_index;
+		}
+	}
+
+	if(color_index == 6 && shape_index != 1){
+		// yellow cube
+		object_index = 9;
+	}
+
+	if(color_index == 0){
+		// dark green cube
+		object_index = 4;
+	}
+
+	if(color_index == 4){
+		object_index = 5;
+	}
+
+	if(color_index == 5){
+		// orange star
+		object_index = 10;
+	}
+
+	return object_index;
+
+}
+
+
+
+void depthCallback(const sensor_msgs::ImageConstPtr& depthimg){
+	ras_cv::to_cv_copy_depth(&ros_depth_img, depthimg);
+	cv::imshow(WINDOW_NAME, ros_depth_img);
+
+}
 
 
 void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
@@ -164,6 +234,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	cv::Mat hsv_img;
 	// cv::Mat thres_img;
 	cv::Mat fin_img;
+	int circularObject = 0;
 
 	std::vector<cv::KeyPoint> key_points;
 	// std::list<std::string> votelist;
@@ -190,9 +261,9 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 	ras_cv::blur(pr_img, blurred_img, blur_type, blur_params);
 
-	ras_cv::morph_tranform(blurred_img, morphed_img, ras_cv::OPEN, cv::MORPH_RECT, morph_size);
+	// ras_cv::morph_tranform(blurred_img, morphed_img, ras_cv::OPEN, cv::MORPH_RECT, morph_size);
 	ras_cv::morph_tranform(blurred_img, morphed_img, morph_type_1, cv::MORPH_RECT, morph_size);
-	ras_cv::morph_tranform(blurred_img, morphed_img, morph_type_2, cv::MORPH_RECT, morph_size);
+	ras_cv::morph_tranform(blurred_img, blurred_img, morph_type_2, cv::MORPH_RECT, morph_size);
 	// detector.detect(grayimg, key_points);
 
 	if(tranform_to_hsv){
@@ -251,6 +322,10 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 		// ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
 		// << std::endl;
 
+		// std::cout <<
+		// ras_cv::writeMatrixAsString<cv::Vec3b>(ros_depth_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
+		// << std::endl;
+
 	}
 
 
@@ -263,21 +338,34 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
   	for(int i =0; i < key_points.size(); i++){
 
-   		cv::imshow(
-        POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
-        pr_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows)));
+   		// cv::imshow(
+     //    POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
+     //    pr_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows)));
 
         cv::Mat houghimg = hsv_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows, 2.50));
         int numCircles = ras_cv::findHoughCircles(houghimg, hough_threshold1, hough_threshold2);
-        if(numCircles >= 1){
-        	std::cout << "circle detected; either red ball or yellow ball";
-        }
+        // if(numCircles >= 1){
+        // 	if(shapevotelist.size() >= 8){
+        // 		circularObject = 1;
+        // 		while(!shapevotelist.empty()){
+        // 			shapevotelist.pop_back();        				
+        // 		}
+        // 	}
+        // 	std::cout << "circle detected; either red ball or yellow ball";
+        // 	// circularObject = 1;
+        // 	// code for circle = 0.
+        // 	shapevotelist.push_back(0);
+        // }else{
+        // 	shapevotelist.push_back(1);
+        // }
 
-        ras_object_lib::Image_Transfer  it = transferImage(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 0.60)));
-        ras_object_lib::Image_Transfer  it_shape = transferImage(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 1.50)));
+
+        ras_object_lib::Image_Transfer  it = transferImage(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 0.60)), 0);
+        ras_object_lib::Image_Transfer  it_shape = transferImage(fin_thres_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 2.50)), 0);
         // ras_object_lib::Image_Transfer  it_material = transferImage(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 1.50)));
 
         std::vector<string> colors_in_frames;
+        int shape_index;
 
         if(client_color.call(it)){
         	if(votelist.size() >= 10){
@@ -286,26 +374,23 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         			votes[index]++;
         		}
         		std::cout << "hiii";
-        		std:cout << votes;
+        		std::cout << votes;
         		int col_index = ras_cv::argmax(votes, 7);
         		int maxval = ras_cv::maxval(votes, 7);
         		if(maxval >= 7){
         			while(!votelist.empty()){
         				votelist.pop_back();        				
-        			}
+        			}	
+
         			for(int i =0; i< 7; i++){
         				votes[i] =0;
         			}
+
         			// some color detected yay !!!!!!
         			// publish here ..........
-        			ras_msgs::Object_id oid;
-        			oid.object = 1;
-        			oid.color = col_index;
-        			oid.shape = 1;
-        			oid.time = 1000;
-        			oid.x = 1;
-        			oid.y = 10;
-        			object_pub.publish(oid);
+
+        			int object_index = decisiontree(col_index, shape_index);
+        			sendMessageToSpeaker(col_index, 1, 1);
         			std::cout << col_index << "\n";
         			std::cout << "some color" << "\n";
 
@@ -323,6 +408,33 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         	string color = it.response.str;
         	
         // 	// client_color.call(it);
+        }
+
+
+        if(client_shape.call(it_shape)){
+        	if(shapevotelist.size() > 10){
+        		for (std::list<int>::const_iterator it = shapevotelist.begin(), end = shapevotelist.end(); it != end; ++it){
+        			int index = *it;
+        			shape_votes[index]++;
+        		}
+
+        		int shape_index = ras_cv::argmax(shape_votes, 7);
+        		int max_shape_val = ras_cv::maxval(shape_votes, 7);
+
+        		if(max_shape_val >= 7){
+        			while(!shapevotelist.empty()){
+        				shapevotelist.pop_back();
+        			}
+
+        			for(int i = 0;i < 7; i++){
+        				shape_votes[i] = 0;
+        			}
+
+        			// int shape_index = decisiontree_shape();
+        		}
+
+        	}
+
         }
 
 	}
@@ -361,13 +473,16 @@ int main(int argc, char ** argv){
 	ros::init(argc, argv, "object_detection_tune");
 
 	ros::NodeHandle node("~");
-	ros::Subscriber sub = node.subscribe("/camera/rgb/image_raw", MAX_BUFFER, tuneCallback);
+
+	// first take the depth image and then the raw image later.
+	ros::Subscriber sub_depth = node.subscribe("/camera/depth_registered/image_raw", MAX_BUFFER, depthCallback);
+	ros::Subscriber sub_image = node.subscribe("/camera/rgb/image_raw", MAX_BUFFER, tuneCallback);
 
   	client_color = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/color");
   	client_shape = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/shape");
-  	client_material = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/material");
+  	// client_material = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/material");
 
-  	object_pub = node.advertise<ras_msgs::Object_id>("/object_pub", 1);
+  	object_pub = node.advertise<ras_msgs::Object_id>("/object_pub/color", 1);
 
 
 	ros::Rate loop_rate(LOOP_RATE);

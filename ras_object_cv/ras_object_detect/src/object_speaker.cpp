@@ -21,6 +21,7 @@ using namespace std;
 const int LOOP_RATE = 10;
 ros::Publisher  speech_publish;
 
+
 void speechCallback(const ras_msgs::Object_id& obj_msg){
 	int color_code = obj_msg.color;
 	int shape_code = obj_msg.shape;

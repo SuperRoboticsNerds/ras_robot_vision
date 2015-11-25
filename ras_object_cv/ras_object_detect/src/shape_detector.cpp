@@ -9,6 +9,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/video/background_segm.hpp>
 #include <opencv2/photo/photo.hpp>
+#include <ras_msgs/Shape.h>
 
 
 #include <ras_object_lib/image_converter.h>
@@ -51,6 +52,7 @@ bool blob_tune = false;
 bool morph_tune = false;
 bool blur_tune = false;
 bool detect_all = true;
+
 std::string blur_type = BLUR_NORMAL;
 std::string color_tune_type="hue";
 int hl_def = 0;
@@ -65,6 +67,10 @@ std::string morph_type = ras_cv::NO_MORPH;
 std::string color=ras_cv::GREEN_DARK;
 std::vector<std::string> object_colors;
 
+// params for hough circles 
+int hough_threshold1 = 130;
+int hough_threshold2 = 30;
+
 // std::string color=ras_cv::RED;
 // std::string blur_type = BLUR_NORMAL;
 int morph_size = 5;
@@ -73,8 +79,8 @@ int blur_size = 5;
 int mask_size_x = 3;
 int mask_size_y = 3;
 
-int min_area = 220;
-int max_area = 7500;
+int min_area = 420;
+int max_area = 8500;
 
 bool circular = false;
 bool filter_ratio = false;
@@ -92,6 +98,9 @@ cv::SimpleBlobDetector::Params params;
 cv::Mat thres_img;
 std::vector<cv::Mat> thres_imgs;
 std::vector<cv::KeyPoint> key_points;
+std::list<int> votelist;
+int votes[7]={0};
+ros::Publisher shape_pub;
 
 
 static const int ROWS = 1;
@@ -108,7 +117,78 @@ void colorTuneCallback(){
 
 }
 
+
+double angle(cv::Point pt1, cv::Point pt2, cv::Point pt0){
+
+	double dx1 = pt1.x - pt0.x;
+	double dy1 = pt1.y - pt0.y;
+	double dx2 = pt2.x - pt0.x;
+	double dy2 = pt2.y - pt0.y;
+	return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
+
+}
+
+
+void publishMessage(int shape, double distance, double angle){
+	ras_msgs::Shape sid;
+	sid.shape = shape;
+	sid.distance = distance;
+	sid.angle = angle;
+	shape_pub.publish(sid);
+
+}
+
+
+
+int decisionRules(int *votes, int size){
+	int finshape;
+	if(size != 7){
+		return -1;
+	}
+
+//sphere
+	if(votes[5] >= 2){
+		finshape = 5;
+	}
+
+//prism
+	if(votes[3] >= 2){
+		finshape = 1;
+	}
+
+//cube
+	if(votes[4] >= 4){
+		finshape = 4;
+	}
+
+	return finshape;
+
+}
+
+
+void setLabel(cv::Mat& im, const std::string label, std::vector<cv::Point>& contour)
+{
+	int fontface = cv::FONT_HERSHEY_SIMPLEX;
+	double scale = 0.4;
+	int thickness = 1;
+	int baseline = 0;
+
+	cv::Size text = cv::getTextSize(label, fontface, scale, thickness, &baseline);
+	cv::Rect r = cv::boundingRect(contour);
+
+	cv::Point pt(r.x + ((r.width - text.width) / 2), r.y + ((r.height + text.height) / 2));
+	cv::rectangle(im, pt + cv::Point(0, baseline), pt + cv::Point(text.width, -text.height), CV_RGB(255,255,255), CV_FILLED);
+	cv::putText(im, label, pt, fontface, scale, CV_RGB(0,0,0), thickness, 8);
+}
+
+
+
 void detectShapes(const cv::Mat &box_img, cv::Mat &dst);
+
+
+void detectShapes1(cv::Mat col_img,const cv::Mat &bw_img, cv::Mat &dst);
+
+
 
 void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
@@ -156,6 +236,8 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 
 	ras_cv::morph_tranform(blurred_img, morphed_img, morph_type, cv::MORPH_RECT, morph_size);
+	ras_cv::morph_tranform(blurred_img, morphed_img, ras_cv::CLOSE, cv::MORPH_RECT, morph_size);
+	ras_cv::morph_tranform(blurred_img, blurred_img, ras_cv::OPEN, cv::MORPH_RECT, morph_size);
 	// detector.detect(grayimg, key_points);
 
 	if(tranform_to_hsv){
@@ -206,14 +288,15 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	// std::cout << "Number of detected key points:" << key_points.size() << "\n";
 
 
-	if(key_points.size() >= 1){
-		// std::cout <<
-		// ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
-		// << std::endl;
+	// if(key_points.size() >= 1){
+	// 	std::cout <<
+	// 	ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
+	// 	<< std::endl;
 
-	}
+	// }
 
 	cv::Mat dstshape;
+	cv::Mat dstshape1;
 
 	for(int i =0; i < key_points.size(); i++){
 
@@ -221,7 +304,10 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
         pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows)));
 
-        detectShapes(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows)), dstshape);
+        detectShapes(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 3.5)), dstshape);
+        // detectShapes1(hsv_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows)), fin_thres_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 2.5)), dstshape1);
+
+
 	}
 
   	cv::imshow(WINDOW_NAME, fin_img);
@@ -232,10 +318,170 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 
 
+
+void detectShapes1(cv::Mat col_img, const cv::Mat &bw_img, cv::Mat &dst){
+
+	cv::Mat tempimg;
+	// tempimg = cv::Scalar(255, 255, 255) - bw_img;
+	std::vector<std::vector<cv::Point> > contours;
+	cv::Mat bwCannyImg;
+	int threshold1 = 30;
+	int threshold2 = 150;
+
+	cv::cvtColor(bw_img, tempimg, CV_RGB2GRAY);
+	cv::Canny(col_img, bwCannyImg, threshold1, threshold2, 3);
+
+	cv::findContours(tempimg, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+
+
+	std::vector<cv::Point> approx;
+
+	dst = bw_img.clone();
+	cv::Mat bwtempimg = cv::Scalar(255, 255, 255) - bw_img;
+	cv::cvtColor(bwtempimg, bwtempimg, CV_RGB2GRAY);
+	int numCircles1;
+	int shape = 5;
+
+
+
+	for (int i = 0; i < contours.size(); i++)
+	{
+		// Approximate contour with accuracy proportional
+		// to the contour perimeter
+
+		if(votelist.size() >= 6){
+			int finshape = decisionRules(votes, 7);
+			double area = cv::contourArea(contours[i]);
+			double distance =  1100/area;
+			double angle = -10.0;
+
+			//empty votes and votelist
+			while(!votelist.empty()){
+        		votelist.pop_back();        				
+        	}	
+
+        	for(int i = 0;i < 7; i++){
+        		votes[i] = 0; 
+        	}
+
+			publishMessage(finshape, distance, angle);
+			//publish message here for shape and area 
+		}
+
+		numCircles1 = ras_cv::findHoughCircles(col_img, hough_threshold1, hough_threshold2);
+		// std::cout << numCircles1;
+// 
+		cv::approxPolyDP(cv::Mat(contours[i]), approx, cv::arcLength(cv::Mat(contours[i]), true)*0.02, true);
+
+		// Skip small or non-convex objects 
+		if (std::fabs(cv::contourArea(contours[i])) < 80 || !cv::isContourConvex(approx))
+			continue;
+
+
+		// cv::Mat houghimg = hsv_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows, 2.50));
+        int numCircles = ras_cv::findHoughCirclesbw(bwtempimg, hough_threshold1, hough_threshold2);
+
+        double area = cv::contourArea(contours[i]);
+		cv::Rect r = cv::boundingRect(contours[i]);
+		int radius = r.width / 2;
+
+
+        std::cout << numCircles << "\n";
+        // if(numCircles > 0){
+        // 	setLabel(dst, "CIR", contours[i]);
+        // 	std::cout <"circle detected";
+        // 	shape = 5;
+        // 	votelist.push_back(shape);
+        // 	continue;
+        // }
+
+
+		if (approx.size() == 3)
+		{
+			shape = 1;
+			std::cout << "prism detected";
+			std:cout << "lololol";
+			votelist.push_back(shape);
+			setLabel(dst, "TRI", contours[i]);    // Triangles
+
+		}
+
+
+		if (std::abs(1 - ((double)r.width / r.height)) <= 0.2 &&
+			std::abs(1 - (area / (CV_PI * std::pow(radius, 2)))) <= 0.2){
+			setLabel(dst, "CIR", contours[i]);
+			cout <<"circle detected";
+			shape = 5;
+			votes[shape]++;
+			votelist.push_back(shape);
+
+			continue;
+
+		}
+
+
+
+		if (approx.size() >= 4 && approx.size() <= 6)
+		{
+			// Number of vertices of polygonal curve
+			int vtc = approx.size();
+
+			// Get the cosines of all corners
+			std::vector<double> cos;
+			for (int j = 2; j < vtc+1; j++)
+				cos.push_back(angle(approx[j%vtc], approx[j-2], approx[j-1]));
+
+			// Sort ascending the cosine values
+			std::sort(cos.begin(), cos.end());
+
+			// Get the lowest and the highest cosine
+			double mincos = cos.front();
+			double maxcos = cos.back();
+
+			// Use the degrees obtained above and the number of vertices
+			// to determine the shape of the contour
+
+			//pentagon
+			if(mincos >= -0.34 && maxcos <= -0.27){
+				setLabel(dst, "PENTA", contours[i]);
+				shape = 3;				
+			} else if(mincos >= -0.55 && maxcos <= -0.45){
+				setLabel(dst, "HEXA", contours[i]);
+				shape = 6;
+			} else if(vtc == 4 && mincos >= -0.1 && maxcos <= 0.3){
+				setLabel(dst, "CUBE", contours[i]);
+				//cube dtected
+				shape = 2;
+			}
+			votelist.push_back(shape);
+
+		}
+		else
+		{
+			// Detect and label circles
+			double area = cv::contourArea(contours[i]);
+			cv::Rect r = cv::boundingRect(contours[i]);
+			int radius = r.width / 2;
+
+			if (std::abs(1 - ((double)r.width / r.height)) <= 0.2 &&
+			    std::abs(1 - (area / (CV_PI * std::pow(radius, 2)))) <= 0.2)
+				setLabel(dst, "CIR", contours[i]);
+		}
+
+		votes[shape]++;
+	}
+
+	cv::imshow("dst", dst);
+
+
+}
+
+
+
 void detectShapes(const cv::Mat &box_img, cv::Mat &dst){
 	cv::Mat bw_img;
-	int threshold1 = 10;
-	int threshold2 = 160;
+	int threshold1 = 30;
+	int threshold2 = 150;
 
 	cv::Canny(box_img, bw_img, threshold1, threshold2, 3);
 
@@ -252,7 +498,7 @@ void detectShapes(const cv::Mat &box_img, cv::Mat &dst){
 
        if ( !cv::isContourConvex(approx)){
        		// std::cout <<  
-       		std::cout << "no" << "\n"; 
+       		// std::cout << "no" << "\n"; 
 			continue;
        }
 
@@ -281,12 +527,12 @@ void detectShapes(const cv::Mat &box_img, cv::Mat &dst){
        	     std::cout << "sphere detected";
        }
         // continue;
-
 	}
-
-
-
 }
+
+
+
+
 
 
 int main(int argc, char ** argv){
@@ -315,6 +561,7 @@ int main(int argc, char ** argv){
 
 	ros::NodeHandle node("~");
 	ros::Subscriber sub = node.subscribe("/camera/rgb/image_raw", MAX_BUFFER, tuneCallback);
+	shape_pub = node.advertise<ras_msgs::Shape>("/object_pub/shape", 1);
 
 	ros::Rate loop_rate(LOOP_RATE);
 
