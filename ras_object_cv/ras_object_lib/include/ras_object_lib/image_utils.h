@@ -33,6 +33,8 @@ namespace ras_cv{
 
     int findHoughCircles(cv::Mat& img, int threshold1, int threshold2);
 
+    int findHoughCirclesbw(const cv::Mat& img, int threshold1, int threshold2);
+
 	void  create_windows(
     const std::string &name, 
     int rows, 

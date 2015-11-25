@@ -36,6 +36,7 @@ template<typename T> std::string ras_cv::writeMatrixAsString(const cv::Mat& mat)
 }
 
 
+
 template std::string ras_cv::writeVectorAsString<cv::Vec3b>(cv::vector<cv::Vec3b> & vector);
 
 
@@ -66,6 +67,13 @@ int ras_cv::findHoughCircles(cv::Mat& img, int threshold1, int threshold2){
   cv::split(img, hsv_channels);
   cv::Mat grayimg = hsv_channels[1];
   cv::HoughCircles(grayimg, circles, CV_HOUGH_GRADIENT, 1, 25, threshold1, threshold2, 0, 0);
+  return circles.size();
+
+}
+
+int ras_cv::findHoughCirclesbw(const cv::Mat& img, int threshold1, int threshold2){
+  std::vector<cv::Vec3f> circles;
+  cv::HoughCircles(img, circles, CV_HOUGH_GRADIENT, 1, 25, threshold1, threshold2, 0, 0);
   return circles.size();
 
 }
