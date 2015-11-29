@@ -107,6 +107,25 @@ target_link_libraries(object_speaker
   ras_object_lib
 )
 
+
+add_executable(collect_av_info   src/collect_av_info.cpp)
+
+
+add_dependencies(collect_av_info
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS}
+)
+
+
+target_link_libraries(collect_av_info
+  ${roscpp_LIBRARIES}
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+  ras_object_lib
+)
+
+
+
 add_executable(color_detect  src/color_detect.cpp)
 
 add_dependencies(color_detect

@@ -50,12 +50,16 @@ static const std::string TRACKBAR_WINDOW="Trackbars";
 const int LOOP_RATE=10;
 const int MAX_BUFFER= 5;
 
+
 bool color_tune = false;
 bool blob_tune = false;
 bool morph_tune = false;
 bool blur_tune = false;
+
+
 std::string blur_type = BLUR_NORMAL;
 std::string color_tune_type="hue";
+
 int hl_def = 0;
 int hh_def = 255;
 int vl_def = 0;
@@ -118,7 +122,7 @@ ros::ServiceClient client_color;
 ros::ServiceClient client_shape;
 ros::ServiceClient client_material;
 ros::Publisher object_pub;
-
+ros::Publisher  obj_img_pub;
 
 
 static const int ROWS = 1;
@@ -339,23 +343,6 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
         pr_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows)));
 
-        cv::Mat houghimg = hsv_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows, 2.50));
-        int numCircles = ras_cv::findHoughCircles(houghimg, hough_threshold1, hough_threshold2);
-        if(numCircles >= 1){
-        	if(shapevotelist.size() >= 8){
-        		circularObject = 1;
-        		while(!shapevotelist.empty()){
-        			shapevotelist.pop_back();        				
-        		}
-        	}
-        	std::cout << "circle detected; either red ball or yellow ball";
-        	// circularObject = 1;
-        	// code for circle = 0.
-        	shapevotelist.push_back(0);
-        }else{
-        	shapevotelist.push_back(1);
-        }
-
 
         ras_object_lib::Image_Transfer  it = transferImage(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 0.60)), 0);
         // ras_object_lib::Image_Transfer  it_shape = transferImage(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 1.50)));
@@ -450,7 +437,7 @@ int main(int argc, char ** argv){
   	client_shape = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/shape");
   	client_material = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/material");
 
-  	object_pub = node.advertise<ras_msgs::Object_id>("/object_pub", 1);
+  	object_pub = node.advertise<ras_msgs::Object_id>("/object/color", 1);
 
 
 	ros::Rate loop_rate(LOOP_RATE);

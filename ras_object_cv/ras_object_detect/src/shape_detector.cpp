@@ -95,12 +95,22 @@ int min_inertia_ratio = 15;
 
 int min_distance_between_blobs= 50;
 cv::SimpleBlobDetector::Params params;
+
+//hough transform canny params
+int threshold1 = 30;
+int threshold2 = 150;
+
+
 cv::Mat thres_img;
 std::vector<cv::Mat> thres_imgs;
 std::vector<cv::KeyPoint> key_points;
 std::list<int> votelist;
+std::list<int> votelist2;
+
 int votes[7]={0};
+int votes2[7]={0};
 ros::Publisher shape_pub;
+
 
 
 static const int ROWS = 1;
@@ -141,19 +151,24 @@ void publishMessage(int shape, double distance, double angle){
 
 
 int decisionRules(int *votes, int size){
-	int finshape;
+	int finshape =2;
+	std:cout << "looool";
 	if(size != 7){
 		return -1;
 	}
 
+	if(votes[1] >= 2){
+		finshape = 1;
+	}
+
 //sphere
-	if(votes[5] >= 2){
+	if(votes[5] >= 3){
 		finshape = 5;
 	}
 
 //prism
 	if(votes[3] >= 2){
-		finshape = 1;
+		finshape = 3;
 	}
 
 //cube
@@ -161,9 +176,11 @@ int decisionRules(int *votes, int size){
 		finshape = 4;
 	}
 
+
 	return finshape;
 
 }
+
 
 
 void setLabel(cv::Mat& im, const std::string label, std::vector<cv::Point>& contour)
@@ -183,7 +200,7 @@ void setLabel(cv::Mat& im, const std::string label, std::vector<cv::Point>& cont
 
 
 
-void detectShapes(const cv::Mat &box_img, cv::Mat &dst);
+void detectShapes(cv::Mat box_img, cv::Mat &dst);
 
 
 void detectShapes1(cv::Mat col_img,const cv::Mat &bw_img, cv::Mat &dst);
@@ -300,15 +317,16 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 	for(int i =0; i < key_points.size(); i++){
 
-   		cv::imshow(
-        POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
-        pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows)));
+   		// cv::imshow(
+     //    POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
+     //    pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows)));
 
-        detectShapes(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 3.5)), dstshape);
+        detectShapes(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 2.5)), dstshape);
         // detectShapes1(hsv_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows)), fin_thres_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 2.5)), dstshape1);
 
 
 	}
+	
 
   	cv::imshow(WINDOW_NAME, fin_img);
   	// cv::imshow(WINDOW_NAME, thres_img);
@@ -343,13 +361,12 @@ void detectShapes1(cv::Mat col_img, const cv::Mat &bw_img, cv::Mat &dst){
 	int shape = 5;
 
 
-
 	for (int i = 0; i < contours.size(); i++)
 	{
 		// Approximate contour with accuracy proportional
 		// to the contour perimeter
 
-		if(votelist.size() >= 6){
+		if(votelist.size() >= 8){
 			int finshape = decisionRules(votes, 7);
 			double area = cv::contourArea(contours[i]);
 			double distance =  1100/area;
@@ -400,7 +417,7 @@ void detectShapes1(cv::Mat col_img, const cv::Mat &bw_img, cv::Mat &dst){
 		{
 			shape = 1;
 			std::cout << "prism detected";
-			std:cout << "lololol";
+			// std:cout << "lololol";
 			votelist.push_back(shape);
 			setLabel(dst, "TRI", contours[i]);    // Triangles
 
@@ -454,7 +471,7 @@ void detectShapes1(cv::Mat col_img, const cv::Mat &bw_img, cv::Mat &dst){
 				shape = 2;
 			}
 			votelist.push_back(shape);
-
+			
 		}
 		else
 		{
@@ -473,12 +490,13 @@ void detectShapes1(cv::Mat col_img, const cv::Mat &bw_img, cv::Mat &dst){
 
 	cv::imshow("dst", dst);
 
-
 }
 
 
 
-void detectShapes(const cv::Mat &box_img, cv::Mat &dst){
+// shape detection function
+
+void detectShapes(cv::Mat box_img, cv::Mat &dst){
 	cv::Mat bw_img;
 	int threshold1 = 30;
 	int threshold2 = 150;
@@ -492,6 +510,7 @@ void detectShapes(const cv::Mat &box_img, cv::Mat &dst){
 	std::vector<cv::Point> approx;
 
 	dst = box_img.clone();
+	int shape = 5;
 
 	for(int i =0; i < contours.size(); i++){
 		cv::approxPolyDP(cv::Mat(contours[i]), approx, cv::arcLength(cv::Mat(contours[i]), true) * 0.02, true);
@@ -503,48 +522,80 @@ void detectShapes(const cv::Mat &box_img, cv::Mat &dst){
        }
 
 
+       if(votelist2.size() >= 8){
+			int finshape = decisionRules(votes2, 7);
+			double area = cv::contourArea(contours[i]);
+			double distance =  1100/area;
+			double angle = -10.0;
+
+			//empty votes and votelist
+			while(!votelist2.empty()){
+        		votelist2.pop_back();        				
+        	}	
+
+        	for(int i = 0;i < 7; i++){
+        		votes2[i] = 0; 
+        	}
+
+			publishMessage(finshape, distance, angle);
+			//publish message here for shape and area 
+		}
+
+
 		std::fabs(cv::contourArea(contours[i]));
        	
        	std::cout << "no of  corner kepoints" << approx.size() << "\n";
        if(approx.size() == 3){
        	 // annote this image with the label.
        		std::cout << "triangle detected";
+       		shape = 1;
+       		votes2[shape]++;
+       		votelist2.push_back(shape);
+       		continue;
+       }	
+
+       int numCircles1 = ras_cv::findHoughCircles(box_img, hough_threshold1, hough_threshold2);
+       if(numCircles1 > 0){
+       		shape = 5;
+       		votes2[shape]++;
+       		continue; 
        }
 
        if(approx.size() == 4){
        	  std::cout << "cube detected";
+       	  shape = 2;
        }
-
-       if(approx.size() == 8 || approx.size() == 12){
-       		std::cout << "cross detected";
-       }
+       // if(approx.size() == 8 || approx.size() == 12){
+       // 		std::cout << "cross detected";
+       // }
 
        if(approx.size() == 5 || approx.size() == 10){
        		std::cout << "star detected";
+       		shape = 5;
        }
 
        if(approx.size() > 12){
        	     std::cout << "sphere detected";
+       	     shape = 5;
        }
+
+       votelist2.push_back(shape);
+       votes2[shape]++;
         // continue;
 	}
+
 }
-
-
-
 
 
 
 int main(int argc, char ** argv){
 
 	// cout << "Hello People";	
-	
-
-	ras_cv::create_windows(POINT_WINDOW_NAME, ROWS, COLS, X_START, Y_START, X_SIZE, Y_SIZE, X_OFF, Y_OFF);
-	cv::namedWindow(WINDOW_NAME, CV_WINDOW_AUTOSIZE);
-  	cv::moveWindow(WINDOW_NAME, 400, 250);
-  	cv::namedWindow(TRACKBAR_WINDOW, CV_WINDOW_NORMAL);
-  	cv::moveWindow(TRACKBAR_WINDOW, 1050, 250);
+	// ras_cv::create_windows(POINT_WINDOW_NAME, ROWS, COLS, X_START, Y_START, X_SIZE, Y_SIZE, X_OFF, Y_OFF);
+	// cv::namedWindow(WINDOW_NAME, CV_WINDOW_AUTOSIZE);
+ //  	cv::moveWindow(WINDOW_NAME, 400, 250);
+ //  	cv::namedWindow(TRACKBAR_WINDOW, CV_WINDOW_NORMAL);
+ //  	cv::moveWindow(TRACKBAR_WINDOW, 1050, 250);
 
   	// fill the vector of colors
   	object_colors.push_back(ras_cv::GREEN_DARK);
@@ -557,11 +608,11 @@ int main(int argc, char ** argv){
   	object_colors.push_back(ras_cv::ORANGE);
 
 	
-	ros::init(argc, argv, "object_detection_tune");
+	ros::init(argc, argv, "shape_detection");
 
 	ros::NodeHandle node("~");
 	ros::Subscriber sub = node.subscribe("/camera/rgb/image_raw", MAX_BUFFER, tuneCallback);
-	shape_pub = node.advertise<ras_msgs::Shape>("/object_pub/shape", 1);
+	shape_pub = node.advertise<ras_msgs::Shape>("/object/shape", 1);
 
 	ros::Rate loop_rate(LOOP_RATE);
 
