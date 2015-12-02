@@ -6,6 +6,8 @@ set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 find_package(
   catkin REQUIRED COMPONENTS
   cv_bridge
+  pcl_conversions
+  pcl_ros
   image_transport
   roscpp
   sensor_msgs
@@ -74,6 +76,23 @@ target_link_libraries(object_detector_test
 )
 
 
+add_executable(shape_detector_test  src/shape_detector_test.cpp)
+
+
+add_dependencies(shape_detector_test
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS}
+)
+
+
+target_link_libraries(shape_detector_test
+  ${roscpp_LIBRARIES}
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+  ras_object_lib
+)
+
+
 add_executable(shape_detector  src/shape_detector.cpp)
 
 
@@ -106,6 +125,7 @@ target_link_libraries(object_speaker
   ${OpenCV_LIBS}
   ras_object_lib
 )
+
 
 
 add_executable(collect_av_info   src/collect_av_info.cpp)

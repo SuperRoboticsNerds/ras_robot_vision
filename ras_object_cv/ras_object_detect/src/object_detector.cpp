@@ -323,9 +323,9 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	global_counter += 1;
 
 	if(key_points.size() >= 1){
-		// std::cout <<
-		// ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
-		// << std::endl;
+		std::cout <<
+		ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
+		<< std::endl;
 
 	}
 
@@ -402,11 +402,14 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 
 
-int main(int argc, char ** argv){
 
+
+
+
+
+int main(int argc, char ** argv){
 	// cout << "Hello People";	
 	
-
 	ras_cv::create_windows(POINT_WINDOW_NAME, ROWS, COLS, X_START, Y_START, X_SIZE, Y_SIZE, X_OFF, Y_OFF);
 	cv::namedWindow(WINDOW_NAME, CV_WINDOW_AUTOSIZE);
   	cv::moveWindow(WINDOW_NAME, 400, 250);

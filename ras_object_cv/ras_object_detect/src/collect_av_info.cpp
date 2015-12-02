@@ -4,7 +4,7 @@
 #include <ras_object_lib/Image_Transfer.h>
 #include <ras_msgs/Object_id.h>
 #include <ras_msgs/Shape.h>
-#include <ras_msgs/RAS_evidence.h>
+#include <ras_msgs/RAS_Evidence.h>
 
 
 #include <string>
@@ -19,6 +19,7 @@ class ObjectInfo{
 public:
 	ros::NodeHandle n;
 	ros::Publisher speech_publish;	
+	ros::Publisher obj_publish;
 	ros::Subscriber  sub_color;
 	ros::Subscriber  sub_shape;
 	int shape_code;
@@ -34,7 +35,6 @@ public:
 		sub_shape = n.subscribe("/object/shape", 1, &ObjectInfo::shape_cb, this);
 		speech_publish = n.advertise<std_msgs::String>("/espeak/string", 1);
 		obj_publish = n.advertise<ras_msgs::Object_id>("/object/object", 1);
-		ras_evidence_publish = n.advertise<>
 
 		// clusters_pub = n.advertise<std_msgs::String>("", 1);
 
@@ -108,12 +108,12 @@ public:
 		ras_msgs::Object_id obj;
 		obj.object = object_id;
 		obj.color = color_code;
-		obj.shape = shape_code;
-		ros::Time begin = ros::Time::now();
-		obj.time = begin;
+		// obj.shape = shape_code;
+		// ros::Time begin = ros::Time::now();
+		// obj.time = begin;
 
 		speech_publish.publish(message);
-		obj_publish.publish(obj)
+		obj_publish.publish(obj);
 
 	}
 

@@ -139,14 +139,16 @@ double angle(cv::Point pt1, cv::Point pt2, cv::Point pt0){
 }
 
 
-void publishMessage(int shape, double distance, double angle){
+
+void publishMessage(int shape, double xdist, double ydist){
 	ras_msgs::Shape sid;
 	sid.shape = shape;
-	sid.distance = distance;
-	sid.angle = angle;
+	sid.x = xdist;
+	sid.y = ydist;
 	shape_pub.publish(sid);
 
 }
+
 
 
 
@@ -237,6 +239,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	std::vector<cv::KeyPoint> key_points;
 
 	ras_cv::to_cv_copy(&pr_img, inimg);
+	printf ("Cloud: width = %d, height = %d\n", pr_img.rows, pr_img.cols);
 
 	cv::cvtColor(pr_img, grayimg, CV_BGR2GRAY);
 
@@ -305,12 +308,13 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	// std::cout << "Number of detected key points:" << key_points.size() << "\n";
 
 
-	// if(key_points.size() >= 1){
-	// 	std::cout <<
-	// 	ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
-	// 	<< std::endl;
+	if(key_points.size() >= 1){
+		ROS_INFO("Distance from center: %f", pr_img.at<float>(240,320));
+		// std::cout <<
+		// ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
+		// << std::endl;
 
-	// }
+	}
 
 	cv::Mat dstshape;
 	cv::Mat dstshape1;
@@ -585,6 +589,8 @@ void detectShapes(cv::Mat box_img, cv::Mat &dst){
 	}
 
 }
+
+
 
 
 

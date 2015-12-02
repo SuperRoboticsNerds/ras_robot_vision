@@ -35,6 +35,8 @@ namespace ras_cv{
 
     int findHoughCirclesbw(const cv::Mat& img, int threshold1, int threshold2);
 
+    double angle(cv::Point pt1, cv::Point pt2, cv::Point pt0);
+
 	void  create_windows(
     const std::string &name, 
     int rows, 

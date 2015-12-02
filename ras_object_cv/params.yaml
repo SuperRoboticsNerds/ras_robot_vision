@@ -1,0 +1,12 @@
+
+/object_detector/blur_type= gaussian
+/object_detector/blur_tune= no
+
+/object_detector/color_tune= no
+/object_detector/tranform_to_hsv= yes
+/object_detector/color_tune_type= h
+
+/object_detector/blob_tune= no
+
+/object_detector/morph_tune= yes
+/object_detector/morph_type = ellipse
