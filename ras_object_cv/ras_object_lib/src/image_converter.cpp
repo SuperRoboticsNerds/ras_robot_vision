@@ -13,11 +13,11 @@ void ras_cv::to_cv_copy(cv::Mat* cvimg, const sensor_msgs::Image::ConstPtr& img)
 } 
 
 
-void ras_cv::to_cv_copy_depth(cv::Mat* cvimg, const sensor_msgs::Image::ConstPtr& depth_img){
+void ras_cv::to_cv_copy_depth(cv::Mat &cvimg, const sensor_msgs::Image::ConstPtr& depth_img){
 	cv_bridge::CvImagePtr cv_ptr;
 	try{
 		cv_ptr = cv_bridge::toCvCopy(depth_img, sensor_msgs::image_encodings::TYPE_32FC1);
-		*cvimg = cv_ptr->image;
+		cvimg = cv_ptr->image;
 	} catch(cv_bridge::Exception &e){
 		ROS_ERROR("cv_bridge exception: %s", e.what());
 	}

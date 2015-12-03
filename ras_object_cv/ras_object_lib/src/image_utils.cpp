@@ -110,6 +110,36 @@ int ras_cv::maxval(int* arr, int size){
 
 
 
+std::tuple<double, double> ras_cv::nanRatioImage(cv::Mat &img){
+  int count = 0;
+  double depth;
+
+  for(int i= 0; i < img.rows; i++){
+    for(int j = 0; j < img.cols; j++){
+      if(std::isnan(img.at<float>(cv::Point(i, j)))){
+        count ++ ;
+      }else{
+        depth += img.at<float>(cv::Point(i, j));
+      }
+    }
+  }
+
+
+  int count_pixels = img.rows * img.cols;
+  double nan_ratio = (double) count/count_pixels;
+
+  double avg_depth = 0.0;
+
+  if(count_pixels != count){
+    avg_depth = (double) depth / (count_pixels -count);
+  }else{
+    avg_depth = -1;
+  }
+
+  return std::make_tuple(nan_ratio, avg_depth);
+
+}
+
 
 
 // template<typename T> std::string ras_cv::

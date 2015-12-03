@@ -9,6 +9,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <tuple>
 
 
 
@@ -47,6 +48,9 @@ namespace ras_cv{
     int y_size,
     int x_offset,
     int y_offset);
+
+
+    std::tuple<double, double> nanRatioImage(cv::Mat &img);
 
 }
 

@@ -17,6 +17,7 @@ find_package(OpenCV REQUIRED)
 add_service_files(
   FILES
   Image_Transfer.srv
+  Depth_Transfer.srv 
 )
 
 

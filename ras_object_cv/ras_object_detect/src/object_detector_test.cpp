@@ -202,14 +202,13 @@ int decisiontree(int color_index, int shape_index ){
 
 
 void depthCallback(const sensor_msgs::ImageConstPtr& depthimg){
-	ras_cv::to_cv_copy_depth(&ros_depth_img, depthimg);
+	ras_cv::to_cv_copy_depth(ros_depth_img, depthimg);
 	cv::imshow(WINDOW_NAME, ros_depth_img);
 
 }
 
 
 void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
-
 	params.minThreshold = 10;
 	params.maxThreshold = 170;
 
@@ -309,10 +308,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	cv::SimpleBlobDetector detector(params);
 	detector.detect(fin_thres_img, key_points);
 
-
 	cv::drawKeypoints(fin_thres_img, key_points, fin_img, ras_cv::SCALAR_RED,  cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-
-
 	// std::cout << "Number of detected key points:" << key_points.size() << "\n";
 
 	global_counter += 1;
@@ -330,12 +326,9 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 
   	cv::imshow(WINDOW_NAME, fin_img);
-
-
   	// find the number of hough circles
   	// cv::Mat houghimg = ras_cv::get_bounding_box();
-
-
+  	
   	for(int i =0; i < key_points.size(); i++){
 
    		// cv::imshow(
@@ -366,6 +359,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
         std::vector<string> colors_in_frames;
         int shape_index;
+
 
         if(client_color.call(it)){
         	if(votelist.size() >= 10){

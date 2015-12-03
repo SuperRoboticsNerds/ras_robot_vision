@@ -9,6 +9,6 @@ namespace ras_cv{
 
 	void to_ros_copy(const cv::Mat& cvimg, sensor_msgs::ImagePtr& img, int bw);
 
-	void to_cv_copy_depth(cv::Mat* cvimg, const sensor_msgs::Image::ConstPtr& depth_img);
+	void to_cv_copy_depth(cv::Mat& cvimg, const sensor_msgs::Image::ConstPtr& depth_img);
 
 }

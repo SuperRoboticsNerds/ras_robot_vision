@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/image_encodings.h>
 #include <ras_object_lib/Image_Transfer.h>
+#include <ras_object_lib/Depth_Transfer.h>
 
 // #include <opencv2/core.hpp>
 #include <opencv2/opencv.hpp>
@@ -54,6 +55,10 @@ public:
 	ros::Publisher shape_pub;
 	ros::Subscriber img_sub;
 	ros::Subscriber depth_img_sub;
+	ros::Subscriber depth_img_sub2;
+
+	ros::ServiceClient client_material;
+
 	bool color_tune = false;
 	bool blob_tune = false;
 	bool morph_tune = false;
@@ -103,30 +108,37 @@ public:
 	cv::SimpleBlobDetector::Params params;
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1; 
 	pcl::PointCloud<pcl::PointXYZ>::ConstPtr cl1;
+	cv::Mat depth_img;
 
 
 	ShapeDetector(){
+		client_material = n.serviceClient<ras_object_lib::Depth_Transfer>("/classify_objects/material");
 		depth_img_sub = n.subscribe("/camera/depth/points", 1, &ShapeDetector::pointcl_cb, this);
+		depth_img_sub2 = n.subscribe("/camera/depth_registered/image_raw", 1, &ShapeDetector::depthimg_cb, this);
 
 		img_sub = n.subscribe("/camera/rgb/image_raw", 1, &ShapeDetector::shape_cb, this);
 		shape_pub = n.advertise<ras_msgs::Shape>("/object/shape", 1);
 
-
 	}
 
 
-
-	void publishMessage(int shape, double xdist, double ydist){
+	void publishMessage(int shape, double xdist, double ydist, double material){
 		ras_msgs::Shape sid;
 		sid.shape = shape;
 		sid.x = xdist;
 		sid.y = ydist;
+		sid.material = material;
 		shape_pub.publish(sid);
 
 	}
 
 
-
+	ras_object_lib::Depth_Transfer  transferDepth(double ratio, double distance){
+		ras_object_lib::Depth_Transfer dt;
+		dt.request.nan_ratio.data = ratio;
+		dt.request.depth.data = distance;
+		return dt;
+	}
 
 
 
@@ -146,9 +158,9 @@ public:
 	}
 
 
+
 	int decisionRules(int *votes, int size){
 		int finshape =2;
-		std:cout << "looool";
 		if(size != 7){
 			return -1;
 		}
@@ -178,7 +190,7 @@ public:
 
 
 
-	void detectShapes(cv::Mat box_img, cv::Mat &dst, double &xdist, double & ydist){
+	void detectShapes(cv::Mat box_img, cv::Mat &dst, double &xdist, double & ydist, double &material){
 		cv::Mat bw_img;
 		int threshold1 = 30;
 		int threshold2 = 150;
@@ -219,17 +231,17 @@ public:
 	        		votes2[i] = 0; 
 	        	}
 
-				publishMessage(finshape, xdist, ydist);
+				publishMessage(finshape, xdist, ydist, material);
 				//publish message here for shape and area 
 			}
 
 
 			std::fabs(cv::contourArea(contours[i]));
 	       	
-	       	std::cout << "no of  corner kepoints" << approx.size() << "\n";
+	       	// std::cout << "no of  corner kepoints" << approx.size() << "\n";
 	       if(approx.size() == 3){
 	       	 // annote this image with the label.
-	       		std::cout << "triangle detected";
+	       		// std::cout << "triangle detected";
 	       		shape = 1;
 	       		votes2[shape]++;
 	       		votelist2.push_back(shape);
@@ -244,7 +256,7 @@ public:
 	       }
 
 	       if(approx.size() == 4){
-	       	  std::cout << "cube detected";
+	       	  // std::cout << "cube detected";
 	       	  shape = 2;
 	       }
 	       // if(approx.size() == 8 || approx.size() == 12){
@@ -252,12 +264,12 @@ public:
 	       // }
 
 	       if(approx.size() == 5 || approx.size() == 10){
-	       		std::cout << "star detected";
+	       		// std::cout << "star detected";
 	       		shape = 5;
 	       }
 
 	       if(approx.size() > 12){
-	       	     std::cout << "sphere detected";
+	       	     // std::cout << "sphere detected";
 	       	     shape = 5;
 	       }
 
@@ -265,13 +277,12 @@ public:
 	       votes2[shape]++;
 	        // continue;
 		}
-
 	}
 
 
 
 
-	void detectShapes1(cv::Mat col_img, const cv::Mat &bw_img, cv::Mat &dst, double &xdist, double & ydist){
+	void detectShapes1(cv::Mat col_img, const cv::Mat &bw_img, cv::Mat &dst, double &xdist, double & ydist, double &material){
 
 		cv::Mat tempimg;
 		// tempimg = cv::Scalar(255, 255, 255) - bw_img;
@@ -315,7 +326,7 @@ public:
 	        		votes[i] = 0; 
 	        	}
 
-				publishMessage(finshape, xdist, ydist);
+				publishMessage(finshape, xdist, ydist, material);
 				//publish message here for shape and area 
 			}
 
@@ -435,29 +446,22 @@ public:
 
 		int width = cloud_msg->width;
     	int heigth = cloud_msg->height;
-    	printf ("Cloud: width = %d, height = %d\n", cloud_msg->width, cloud_msg->height);
     	const pcl::PointXYZ pt = cloud_msg->points[width/2 + (heigth/2)*width];
-    	printf ("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
+    	// printf ("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
     	cl1 = cloud_msg;
 
   //   	if(key_points.size() >= 1){
-  //   	cv::KeyPoint kp1 = key_points[0];
-		// int xval =  kp1.pt.x;
-		// int yval = kp1.pt.y;
-		// std::cout << "hii";
-
-
-  //   	}
-
 		// cv::KeyPoint kp1 = key_points[0];
 		// int xval =  kp1.pt.x;
-		// int yval = kp1.pt.y;
-
-		// int depth_x = 
-					
 
 	}
 
+
+
+
+	void depthimg_cb(const sensor_msgs::Image::ConstPtr& img){
+		ras_cv::to_cv_copy_depth(depth_img, img);
+	}
 
 
 	void calculateMedianDist(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cl1, int cols, float xval, float yval, double &xdist, double &ydist){
@@ -469,6 +473,7 @@ public:
 
 		double xmedian = 0.0;
 		double ymedian = 0.0;
+		// std::cout << "hahah" << "\n";
 
 		std::vector<double> xvalues;
 		std::vector<double> yvalues;
@@ -532,16 +537,13 @@ public:
 		}else{
 			ydist = 0.25;
 		}
-
 		// ydist = sqrt();
-
 	}
 
 
 
+
 	void shape_cb(const sensor_msgs::ImageConstPtr& inimg){
-
-
 		params.minThreshold = 10;
 		params.maxThreshold = 200;
 
@@ -612,8 +614,6 @@ public:
 			cv::bitwise_or(fin_thres_img, thres_img_3_temp, fin_thres_img);
 		}
 
-
-
 		thres_img =  cv::Scalar(255, 255, 255) - thres_img;
 		fin_thres_img = cv::Scalar(255, 255, 255) - fin_thres_img;
 
@@ -629,26 +629,51 @@ public:
 		double ydist;
 		cv::Mat dstshape;
 
+		cv::imshow(WINDOW_NAME, fin_img);
+
 
 		for(int i =0; i < key_points.size(); i++){
 			xval =  key_points[i].pt.x;
 			yval =  key_points[i].pt.y;
 			calculateMedianDist(cl1, pr_img.cols, xval, yval, xdist, ydist);
 			const pcl::PointXYZ pt1 = cl1->points[yval*pr_img.cols + xval];
-			ROS_INFO("Distance from center: %f, %f, %f", pt1.x, pt1.y, pt1.z);
+			// ROS_INFO("Distance from center: %f, %f, %f", pt1.x, pt1.y, pt1.z);
+			cv::Mat depth_mask_img;
 
-			detectShapes(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 2.5)), dstshape, xdist, ydist);
+			if(depth_img.rows > 0 && depth_img.cols > 0){
+				depth_mask_img = depth_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 2));
+				cv::imshow("Depth rect " , depth_mask_img);
+        		std::tuple<double, double> nan_ratio = ras_cv::nanRatioImage(depth_mask_img);
+        		// std::cout << "ratios" << "\n";
+        		double ratio = std::get<0>(nan_ratio);
+        		double depth = std::get<1>(nan_ratio);
 
-			// cv::Rect roi = Rect(x, y, w, h);
-			// roimg = pr_img
-		// std::cout <<
-		// ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
-		// << std::endl;
+        		ras_object_lib::Depth_Transfer  dt = transferDepth(ratio, depth);
+        		client_material.call(dt);
+        		std::string material_type;
+        		material_type = dt.response.str;\
+        		double mat_type;
+
+        		if(material_type == "1"){
+        			mat_type = 1;
+        		}else{
+        			mat_type = 0;
+        		}
+
+
+        		std::cout << std::get<0>(nan_ratio) << "\t" << std::get<1>(nan_ratio) << "\n";
+
+				detectShapes(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 1.0)), dstshape, xdist, ydist, mat_type);
+        		// printf("%6.2f", ratio);
+
+			}
+
+			
 
 		}
 
 
-		cv::imshow(WINDOW_NAME, fin_img);
+		
   	// cv::imshow(WINDOW_NAME, thres_img);
   		cv::waitKey(1);
 
