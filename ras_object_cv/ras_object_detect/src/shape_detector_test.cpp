@@ -116,8 +116,16 @@ public:
 		depth_img_sub = n.subscribe("/camera/depth/points", 1, &ShapeDetector::pointcl_cb, this);
 		depth_img_sub2 = n.subscribe("/camera/depth_registered/image_raw", 1, &ShapeDetector::depthimg_cb, this);
 
-		img_sub = n.subscribe("/camera/rgb/image_raw", 1, &ShapeDetector::shape_cb, this);
+		img_sub = n.subscribe("/camera/rgb/image_raw", 5, &ShapeDetector::shape_cb, this);
 		shape_pub = n.advertise<ras_msgs::Shape>("/object/shape", 1);
+		object_colors.push_back(ras_cv::GREEN_DARK);
+  		object_colors.push_back(ras_cv::GREEN_FL);
+  		object_colors.push_back(ras_cv::BLUE_DARK);
+  		object_colors.push_back(ras_cv::BLUE_LIGHT);
+  		object_colors.push_back(ras_cv::RED);
+  		object_colors.push_back(ras_cv::VIOLET);
+  		object_colors.push_back(ras_cv::YELLOW);
+  		object_colors.push_back(ras_cv::ORANGE);
 
 	}
 
@@ -129,7 +137,6 @@ public:
 		sid.y = ydist;
 		sid.material = material;
 		shape_pub.publish(sid);
-
 	}
 
 
@@ -429,15 +436,10 @@ public:
 				    std::abs(1 - (area / (CV_PI * std::pow(radius, 2)))) <= 0.2)
 					setLabel(dst, "CIR", contours[i]);
 			}
-
 			votes[shape]++;
 		}
-
 		// cv::imshow("dst", dst);
-
 	}
-
-
 
 
 	void pointcl_cb(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& cloud_msg){
@@ -449,13 +451,10 @@ public:
     	const pcl::PointXYZ pt = cloud_msg->points[width/2 + (heigth/2)*width];
     	// printf ("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
     	cl1 = cloud_msg;
-
   //   	if(key_points.size() >= 1){
 		// cv::KeyPoint kp1 = key_points[0];
 		// int xval =  kp1.pt.x;
-
 	}
-
 
 
 
@@ -578,12 +577,13 @@ public:
 
 		cv::blur(pr_img, blurred_img, cv::Size(blur_size, blur_size), cv::Point(-1, -1));
 
-		ras_cv::morph_tranform(blurred_img, morphed_img, morph_type, cv::MORPH_RECT, morph_size);
+		// ras_cv::morph_tranform(blurred_img, morphed_img, morph_type, cv::MORPH_RECT, morph_size);
 		ras_cv::morph_tranform(blurred_img, morphed_img, ras_cv::CLOSE, cv::MORPH_RECT, morph_size);
-		ras_cv::morph_tranform(blurred_img, blurred_img, ras_cv::OPEN, cv::MORPH_RECT, morph_size);
+		ras_cv::morph_tranform(morphed_img, morphed_img, ras_cv::OPEN, cv::MORPH_RECT, morph_size);
 
 
 		if(tranform_to_hsv){
+			// std::cout << "lol";
 			cv::cvtColor(morphed_img, hsv_img, cv::COLOR_BGR2HSV);
 		}else{
 			hsv_img = morphed_img;
@@ -625,24 +625,23 @@ public:
 		int xval = 0;
 		int yval = 0;
 		cv::Mat roimg;
-		double xdist;
-		double ydist;
+		double xdist = 0;
+		double ydist = 0.2;
 		cv::Mat dstshape;
 
-		cv::imshow(WINDOW_NAME, fin_img);
+		// cv::imshow(WINDOW_NAME, fin_img);
 
 
-		for(int i =0; i < key_points.size(); i++){
+		for(int i =0; i < key_poiints.size(); i++){
 			xval =  key_points[i].pt.x;
 			yval =  key_points[i].pt.y;
 			calculateMedianDist(cl1, pr_img.cols, xval, yval, xdist, ydist);
-			const pcl::PointXYZ pt1 = cl1->points[yval*pr_img.cols + xval];
 			// ROS_INFO("Distance from center: %f, %f, %f", pt1.x, pt1.y, pt1.z);
 			cv::Mat depth_mask_img;
 
 			if(depth_img.rows > 0 && depth_img.cols > 0){
 				depth_mask_img = depth_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 2));
-				cv::imshow("Depth rect " , depth_mask_img);
+				// cv::imshow("Depth rect " , depth_mask_img);
         		std::tuple<double, double> nan_ratio = ras_cv::nanRatioImage(depth_mask_img);
         		// std::cout << "ratios" << "\n";
         		double ratio = std::get<0>(nan_ratio);

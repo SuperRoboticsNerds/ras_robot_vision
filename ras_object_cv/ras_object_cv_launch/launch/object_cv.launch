@@ -6,10 +6,11 @@
   <node pkg="ras_object_detect" type="object_detector" name="object_detection_tune" >
   </node>
 
-  <node pkg="ras_object_detect" type="shape_detector" name="shape_detection" >
+  <node pkg="ras_object_detect" type="shape_detector_test" name="shape_detection_test" >
   </node>
 
   <node pkg="ras_object_detect" type="collect_av_info" name="objinfo" >
   </node>
+
 
 </launch>

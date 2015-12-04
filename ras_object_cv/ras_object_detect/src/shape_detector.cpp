@@ -80,7 +80,7 @@ int mask_size_x = 3;
 int mask_size_y = 3;
 
 int min_area = 420;
-int max_area = 8500;
+int max_area = 9500;
 
 bool circular = false;
 bool filter_ratio = false;
@@ -569,9 +569,6 @@ void detectShapes(cv::Mat box_img, cv::Mat &dst){
        	  std::cout << "cube detected";
        	  shape = 2;
        }
-       // if(approx.size() == 8 || approx.size() == 12){
-       // 		std::cout << "cross detected";
-       // }
 
        if(approx.size() == 5 || approx.size() == 10){
        		std::cout << "star detected";

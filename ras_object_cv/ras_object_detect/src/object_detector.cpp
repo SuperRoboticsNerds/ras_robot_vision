@@ -322,6 +322,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	global_counter += 1;
 
 	if(key_points.size() >= 1){
+		// write the pixel values in the bounding box as a text file ....
 		// std::cout <<
 		// ras_cv::writeMatrixAsString<cv::Vec3b>(hsv_img(ras_cv::get_bounding_box(key_points[0], pr_img.size[1], pr_img.size[0], 0.55)))
 		// << std::endl;
@@ -329,18 +330,11 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	}
 
 
-  	cv::imshow(WINDOW_NAME, fin_img);
-
-
-  	// find the number of hough circles
-  	// cv::Mat houghimg = ras_cv::get_bounding_box();
-
-
   	for(int i =0; i < key_points.size(); i++){
 
-   		cv::imshow(
-        POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
-        pr_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows)));
+   		// cv::imshow(
+     //    POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
+     //    pr_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows)));
 
 
         ras_object_lib::Image_Transfer  it = transferImage(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 0.60)), 0);
@@ -409,11 +403,12 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 int main(int argc, char ** argv){
 	// cout << "Hello People";	
 	
-	ras_cv::create_windows(POINT_WINDOW_NAME, ROWS, COLS, X_START, Y_START, X_SIZE, Y_SIZE, X_OFF, Y_OFF);
-	cv::namedWindow(WINDOW_NAME, CV_WINDOW_AUTOSIZE);
-  	cv::moveWindow(WINDOW_NAME, 400, 250);
-  	cv::namedWindow(TRACKBAR_WINDOW, CV_WINDOW_NORMAL);
-  	cv::moveWindow(TRACKBAR_WINDOW, 1050, 250);
+	// use this part of code only for debugging...
+	// ras_cv::create_windows(POINT_WINDOW_NAME, ROWS, COLS, X_START, Y_START, X_SIZE, Y_SIZE, X_OFF, Y_OFF);
+	// cv::namedWindow(WINDOW_NAME, CV_WINDOW_AUTOSIZE);
+ //  	cv::moveWindow(WINDOW_NAME, 400, 250);
+ //  	cv::namedWindow(TRACKBAR_WINDOW, CV_WINDOW_NORMAL);
+ //  	cv::moveWindow(TRACKBAR_WINDOW, 1050, 250);
 
 
   	// fill the vector of colors
