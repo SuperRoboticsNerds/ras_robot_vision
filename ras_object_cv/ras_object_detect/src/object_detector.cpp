@@ -350,17 +350,22 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         			int index = *it;
         			votes[index]++;
         		}
+
         		std::cout << "hiii";
         		std:cout << votes;
         		int col_index = ras_cv::argmax(votes, 7);
         		int maxval = ras_cv::maxval(votes, 7);
+
+        		while(!votelist.empty()){
+        			votelist.pop_back();        				
+        		}
+
+        		for(int i =0; i< 7; i++){
+        			votes[i] =0;
+        		}
+
         		if(maxval >= 7){
-        			while(!votelist.empty()){
-        				votelist.pop_back();        				
-        			}
-        			for(int i =0; i< 7; i++){
-        				votes[i] =0;
-        			}
+
         			// some color detected yay !!!!!!
         			// publish here ..........
 
@@ -368,20 +373,16 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         			sendMessageToSpeaker(col_index, 1, 1);
         			std::cout << col_index << "\n";
         			std::cout << "some color" << "\n";
-
         		}
-
         	}
 
 
         	int number = atoi(it.response.str.c_str());
         	// it.response.str << number;
         	votelist.push_back(number);
-
         	std::cout << it.response.str << "\n";
         	std::cout << votelist.size() << "\n";
         	string color = it.response.str;
-        	
         // 	// client_color.call(it);
         }
 

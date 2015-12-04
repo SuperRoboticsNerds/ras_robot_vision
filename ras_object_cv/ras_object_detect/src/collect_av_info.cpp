@@ -77,7 +77,7 @@ public:
 		// std_msgs::String message;
 
 		object_id = 100;
-		if(color_id == 2 && shape_id == 1){
+		if(color_id == 2 && shape_id != 2){
 			object_id = 8;
 			message.data = "I see a blue triangle";
 			obj_id = "Blue Triangle";
@@ -119,7 +119,7 @@ public:
 			obj_id = "Purple Cross";
 		}
 
-		if(color_id == 1 && shape_id == 5){
+		if(color_id == 1 ){
 			object_id = 6;
 			message.data = "I see a red ball";
 			obj_id = "Red Ball";
