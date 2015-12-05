@@ -138,8 +138,8 @@ public:
 		// hacks of life which make life easier....
 
 
-		sid.xdist = ydist;
-		sid.ydist = -xdist;
+		sid.x = ydist;
+		sid.y = -xdist;
 		// sid.x = xdist;
 		// sid.y = ydist;
 		sid.material = material;
