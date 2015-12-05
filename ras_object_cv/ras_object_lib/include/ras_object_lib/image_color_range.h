@@ -149,7 +149,7 @@ namespace ras_cv{
 	static const cv::Scalar YELLOW_LOW = cv::Scalar(10, 160, 160);
 	static const cv::Scalar YELLOW_HIGH = cv::Scalar(40, 255, 255);
 
-	static const cv::Scalar ORANGE_LOW = cv::Scalar(0, 90, 80);
+	static const cv::Scalar ORANGE_LOW = cv::Scalar(0, 150, 160);
 	static const cv::Scalar ORANGE_HIGH = cv::Scalar(40, 255, 255);
 
 	// static const cv::Scalar RED_LOW = cv::Scalar(162, 170, 135);
