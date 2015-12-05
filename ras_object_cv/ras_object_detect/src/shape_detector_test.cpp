@@ -133,8 +133,15 @@ public:
 	void publishMessage(int shape, double xdist, double ydist, double material){
 		ras_msgs::Shape sid;
 		sid.shape = shape;
-		sid.x = xdist;
-		sid.y = ydist;
+
+		// small hack so that mattias code works seamlessly ...
+		// hacks of life which make life easier....
+
+
+		sid.xdist = ydist;
+		sid.ydist = -xdist;
+		// sid.x = xdist;
+		// sid.y = ydist;
 		sid.material = material;
 		shape_pub.publish(sid);
 	}
@@ -530,11 +537,11 @@ public:
 
 
 		xdist = xmedian;
-		double diff = ymedian*ymedian - 0.2*0.2;
+		double diff = ymedian*ymedian - 0.21*0.21;
 		if(diff > 0){
 			ydist = sqrt(diff);
 		}else{
-			ydist = 0.25;
+			ydist = 0.20;
 		}
 		// ydist = sqrt();
 	}
@@ -629,10 +636,10 @@ public:
 		double ydist = 0.2;
 		cv::Mat dstshape;
 
-		// cv::imshow(WINDOW_NAME, fin_img);
+		cv::imshow(WINDOW_NAME, fin_img);
 
 
-		for(int i =0; i < key_poiints.size(); i++){
+		for(int i =0; i < key_points.size(); i++){
 			xval =  key_points[i].pt.x;
 			yval =  key_points[i].pt.y;
 			calculateMedianDist(cl1, pr_img.cols, xval, yval, xdist, ydist);
@@ -650,7 +657,7 @@ public:
         		ras_object_lib::Depth_Transfer  dt = transferDepth(ratio, depth);
         		client_material.call(dt);
         		std::string material_type;
-        		material_type = dt.response.str;\
+        		material_type = dt.response.str;
         		double mat_type;
 
         		if(material_type == "1"){
@@ -685,12 +692,9 @@ public:
 
 
 
+
+
 int main(int argc, char ** argv){
-
-	// cout << "Hello People";	
-
-  	// fill the vector of colo
-
 	
 	ros::init(argc, argv, "shape_detection_test");
 
@@ -716,9 +720,6 @@ int main(int argc, char ** argv){
 
 	bool morph_tune = true;
 	// bool color_tune = true;
-
-
-
              
 	ros::spin();
 	return 0;

@@ -87,7 +87,7 @@ int mask_size_x = 3;
 int mask_size_y = 3;
 
 int min_area = 500;
-int max_area = 8000;
+int max_area = 9000;
 
 bool circular = false;
 bool filter_ratio = false;
