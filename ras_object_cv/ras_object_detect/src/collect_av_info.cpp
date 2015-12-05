@@ -50,6 +50,9 @@ public:
 
 	void img_cb(const sensor_msgs::Image &img1){
 		evidence.image_evidence = img1;
+		evidence.group_number = 8;
+		evidence.stamp = ros::Time::now();
+
 	}
 
 

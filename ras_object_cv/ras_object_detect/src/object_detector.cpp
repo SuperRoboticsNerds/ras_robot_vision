@@ -332,6 +332,12 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
   	for(int i =0; i < key_points.size(); i++){
 
+  		sensor_msgs::ImagePtr sensimg;
+
+  		ras_cv::to_ros_copy(pr_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows)), sensimg, 10);
+
+  		obj_img_pub.publish(sensimg);	
+
    		// cv::imshow(
      //    POINT_WINDOW_NAME + " " + ras_cv::writeAsString(i), 
      //    pr_img(ras_cv::get_bounding_box(key_points[i],  pr_img.cols, pr_img.rows)));
@@ -436,6 +442,7 @@ int main(int argc, char ** argv){
   	client_material = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/material");
 
   	object_pub = node.advertise<ras_msgs::Object_id>("/object/color", 1);
+  	obj_img_pub = node.advertise<sensor_msgs::Image>("/object/small_img", 1);
 
 
 	ros::Rate loop_rate(LOOP_RATE);
