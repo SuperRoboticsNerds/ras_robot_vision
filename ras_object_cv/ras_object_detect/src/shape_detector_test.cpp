@@ -91,7 +91,7 @@ public:
 	int mask_size_x = 3;
 	int mask_size_y = 3;
 
-	int min_area = 420;
+	int min_area = 530;
 	int max_area = 9500;
 
 	bool circular = false;
@@ -639,7 +639,8 @@ public:
 		cv::imshow(WINDOW_NAME, fin_img);
 
 
-		for(int i =0; i < key_points.size(); i++){
+		// hack for testing
+		for(int i =0; i < 1; i++){
 			xval =  key_points[i].pt.x;
 			yval =  key_points[i].pt.y;
 			calculateMedianDist(cl1, pr_img.cols, xval, yval, xdist, ydist);
@@ -647,7 +648,7 @@ public:
 			cv::Mat depth_mask_img;
 
 			if(depth_img.rows > 0 && depth_img.cols > 0){
-				depth_mask_img = depth_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 2));
+				depth_mask_img = depth_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 1.0));
 				// cv::imshow("Depth rect " , depth_mask_img);
         		std::tuple<double, double> nan_ratio = ras_cv::nanRatioImage(depth_mask_img);
         		// std::cout << "ratios" << "\n";
@@ -667,7 +668,7 @@ public:
         		}
 
 
-        		std::cout << std::get<0>(nan_ratio) << "\t" << std::get<1>(nan_ratio) << "\n";
+        		std::cout << std::get<0>(nan_ratio) << "," << std::get<1>(nan_ratio) << "\n";
 
 				detectShapes(pr_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 1.0)), dstshape, xdist, ydist, mat_type);
         		// printf("%6.2f", ratio);
@@ -677,12 +678,9 @@ public:
 			
 
 		}
-
-
 		
   	// cv::imshow(WINDOW_NAME, thres_img);
   		cv::waitKey(1);
-
 
 	}
 
