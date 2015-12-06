@@ -394,7 +394,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	}
 
 	
-  	cv::imshow(WINDOW_NAME, fin_img);
+  	// cv::imshow(WINDOW_NAME, fin_img);
   	cv::waitKey(1);
 
 }

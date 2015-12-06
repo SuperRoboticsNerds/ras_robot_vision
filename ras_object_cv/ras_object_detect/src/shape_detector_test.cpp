@@ -639,7 +639,7 @@ public:
 		double ydist = 0.2;
 		cv::Mat dstshape;
 
-		cv::imshow(WINDOW_NAME, fin_img);
+		// cv::imshow(WINDOW_NAME, fin_img);
 
 
 		// hack for testing
