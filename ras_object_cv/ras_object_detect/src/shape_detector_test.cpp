@@ -132,13 +132,12 @@ public:
 	}
 
 
+
 	void publishMessage(int shape, double xdist, double ydist, double material){
 		ras_msgs::Shape sid;
 		sid.shape = shape;
-
 		// small hack so that mattias code works seamlessly ...
 		// hacks of life which make life easier....
-
 
 		sid.x = ydist;
 		sid.y = -xdist;
@@ -544,7 +543,7 @@ public:
 		if(diff > 0){
 			ydist = sqrt(diff);
 		}else{
-			ydist = 0.20;
+			ydist = 0.61;
 		}
 		// ydist = sqrt();
 	}
