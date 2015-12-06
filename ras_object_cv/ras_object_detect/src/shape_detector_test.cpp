@@ -37,7 +37,9 @@ using namespace std;
 
 
 static const std::string WINDOW_NAME="masked image";
+// pcl::PointCloud<pcl::PointXYZ>::ConstPtr cl1;
 
+int global_counter = 0;
 
 
 class ShapeDetector{
@@ -450,17 +452,18 @@ public:
 
 
 	void pointcl_cb(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& cloud_msg){
+		global_counter++;
 
-		// cl1 = cloud_msg;
-
-		int width = cloud_msg->width;
-    	int heigth = cloud_msg->height;
-    	const pcl::PointXYZ pt = cloud_msg->points[width/2 + (heigth/2)*width];
+		if(global_counter > 6){
+			int width = cloud_msg->width;
+    		int heigth = cloud_msg->height;
+    		const pcl::PointXYZ pt = cloud_msg->points[width/2 + (heigth/2)*width];
     	// printf ("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
-    	cl1 = cloud_msg;
-  //   	if(key_points.size() >= 1){
-		// cv::KeyPoint kp1 = key_points[0];
-		// int xval =  kp1.pt.x;
+    		cl1 = cloud_msg;
+
+		}
+		cl1 = cloud_msg;
+
 	}
 
 
@@ -640,7 +643,9 @@ public:
 
 
 		// hack for testing
-		for(int i =0; i < 1; i++){
+		if(global_counter > 9){
+			std::cout << global_counter << "\n";
+			for(int i =0; i < 1; i++){
 			xval =  key_points[i].pt.x;
 			yval =  key_points[i].pt.y;
 			calculateMedianDist(cl1, pr_img.cols, xval, yval, xdist, ydist);
@@ -678,6 +683,8 @@ public:
 			
 
 		}
+
+	}
 		
   	// cv::imshow(WINDOW_NAME, thres_img);
   		cv::waitKey(1);
