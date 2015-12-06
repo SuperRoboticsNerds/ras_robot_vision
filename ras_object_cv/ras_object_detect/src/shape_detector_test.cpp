@@ -37,7 +37,7 @@ using namespace std;
 
 
 static const std::string WINDOW_NAME="masked image";
-// pcl::PointCloud<pcl::PointXYZ>::ConstPtr cl1;
+pcl::PointCloud<pcl::PointXYZ>::ConstPtr cl1;
 
 int global_counter = 0;
 
@@ -454,7 +454,7 @@ public:
 	void pointcl_cb(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& cloud_msg){
 		global_counter++;
 
-		if(global_counter > 6){
+		if(global_counter > 10){
 			int width = cloud_msg->width;
     		int heigth = cloud_msg->height;
     		const pcl::PointXYZ pt = cloud_msg->points[width/2 + (heigth/2)*width];
@@ -643,9 +643,9 @@ public:
 
 
 		// hack for testing
-		if(global_counter > 9){
+		if(global_counter > 12){
 			std::cout << global_counter << "\n";
-			for(int i =0; i < 1; i++){
+			for(int i =0; i < key_points.size(); i++){
 			xval =  key_points[i].pt.x;
 			yval =  key_points[i].pt.y;
 			calculateMedianDist(cl1, pr_img.cols, xval, yval, xdist, ydist);
