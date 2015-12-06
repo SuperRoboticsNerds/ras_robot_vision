@@ -9,10 +9,11 @@
 
 namespace ras_cv{
 
-	static const int color_count = 7;
+	static const int color_count = 8;
 	static const int shape_count = 7;
 
-	static const  std::string RED = "red";
+	static const  std::string RED1 = "red1";
+	static const  std::string RED2 = "red2";
 	static const  std::string BLUE_LIGHT = "blue_light";
 	static const  std::string BLUE_DARK = "blue_dark";
 	static const  std::string BLUE = "blue";
@@ -50,9 +51,9 @@ namespace ras_cv{
 	std::map<std::string, int>  shapemap = {{STAR, 0}, {PRISM, 1}, {CUBE, 2}, {HOLLOW_CUBE, 3}, {CROSS, 4}, {SPHERE, 5}, {CYLINDER, 6}};
 	// static const std::string 
 
-	std::string color_list[] = {RED, BLUE, GREEN_DARK, GREEN_FL, VIOLET, ORANGE, YELLOW, NO_COL};
+	std::string color_list[] = {RED1, BLUE, GREEN_DARK, GREEN_FL, VIOLET, ORANGE, YELLOW, NO_COL};
 
-	std::map<std::string, int> colormap = {{GREEN_DARK, 0}, {RED, 1}, {BLUE, 2}, {ORANGE, 3}, {GREEN_FL, 4}, {VIOLET, 5}, {YELLOW, 6}};
+	std::map<std::string, int> colormap = {{GREEN_DARK, 0}, {RED1, 1}, {BLUE, 2}, {ORANGE, 3}, {GREEN_FL, 4}, {VIOLET, 5}, {YELLOW, 6}};
 	
 	std::map<std::string, int> objectmap = {{RED_CUBE, 0}, {RED_HOLLOW_CUBE, 1}, {BLUE_CUBE, 2}, {BLUE_PRISM, 3}, {GREEN_CUBE, 4}, {GREEN_LIGHT_CYL, 5}, {RED_BALL, 6}, {PURPLE_CROSS, 7}, {PURPLE_STAR, 8}, {YELLOW_CUBE, 9}, {ORANGE_STAR, 10}, {YELLOW_BALL, 11}};
 
@@ -149,14 +150,17 @@ namespace ras_cv{
 	static const cv::Scalar YELLOW_LOW = cv::Scalar(10, 160, 160);
 	static const cv::Scalar YELLOW_HIGH = cv::Scalar(40, 255, 255);
 
-	static const cv::Scalar ORANGE_LOW = cv::Scalar(0, 150, 160);
+	static const cv::Scalar ORANGE_LOW = cv::Scalar(0, 130, 130);
 	static const cv::Scalar ORANGE_HIGH = cv::Scalar(40, 255, 255);
 
 	// static const cv::Scalar RED_LOW = cv::Scalar(162, 170, 135);
 	// static const cv::Scalar RED_HIGH = cv::Scalar(185, 225, 220);
 
-	static const cv::Scalar RED_LOW = cv::Scalar(155, 170, 145);
-	static const cv::Scalar RED_HIGH = cv::Scalar(180, 255, 255);
+	static const cv::Scalar RED_LOW1 = cv::Scalar(145, 90, 95);
+	static const cv::Scalar RED_HIGH1 = cv::Scalar(181, 255, 255);
+
+	static const cv::Scalar RED_LOW2 = cv::Scalar(0, 90, 95);
+	static const cv::Scalar RED_HIGH2 = cv::Scalar(35, 255, 255);
 
 
 	void thresholdColor(cv::Mat& src, cv::Mat& dst, const std::string& color);

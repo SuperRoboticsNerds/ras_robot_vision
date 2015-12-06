@@ -161,6 +161,7 @@ void sendMessageToSpeaker(int col_index, int object_index, int shape_index){
 }
 
 
+
 int decisiontree(int color_index, int shape_index ){
 	// check if it is a circle/spehere
 	int object_index = 100;
@@ -203,9 +204,10 @@ int decisiontree(int color_index, int shape_index ){
 
 void depthCallback(const sensor_msgs::ImageConstPtr& depthimg){
 	ras_cv::to_cv_copy_depth(ros_depth_img, depthimg);
-	cv::imshow(WINDOW_NAME, ros_depth_img);
+	// cv::imshow(WINDOW_NAME, ros_depth_img);
 
 }
+
 
 
 void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
@@ -280,7 +282,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 		cv::cvtColor(thres_img, thres_img_3, CV_GRAY2BGR);
 	}
 
-	cv::Mat t1img[8];
+	cv::Mat t1img[9];
 	int cnt = 0;
 	cv::Mat fin_thres_img;
 	// cv::Mat fin_img;
@@ -362,7 +364,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 
 
         if(client_color.call(it)){
-        	if(votelist.size() >= 10){
+        	if(votelist.size() >= 6){
         		for (std::list<int>::const_iterator it = votelist.begin(), end = votelist.end(); it != end; ++it){
         			int index = *it;
         			votes[index]++;
@@ -371,7 +373,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         		std::cout << votes;
         		int col_index = ras_cv::argmax(votes, 7);
         		int maxval = ras_cv::maxval(votes, 7);
-        		if(maxval >= 7){
+        		if(maxval >= 3){
         			while(!votelist.empty()){
         				votelist.pop_back();        				
         			}	
@@ -458,7 +460,8 @@ int main(int argc, char ** argv){
   	object_colors.push_back(ras_cv::GREEN_FL);
   	object_colors.push_back(ras_cv::BLUE_DARK);
   	object_colors.push_back(ras_cv::BLUE_LIGHT);
-  	object_colors.push_back(ras_cv::RED);
+  	object_colors.push_back(ras_cv::RED1);
+  	object_colors.push_back(ras_cv::RED2);
   	object_colors.push_back(ras_cv::VIOLET);
   	object_colors.push_back(ras_cv::YELLOW);
   	object_colors.push_back(ras_cv::ORANGE);

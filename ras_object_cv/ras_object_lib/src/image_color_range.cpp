@@ -49,9 +49,12 @@ void ras_cv::thresholdColor(cv::Mat& src, cv::Mat& dst, const std::string& color
 		cv::inRange(src, ras_cv::ORANGE_LOW, ras_cv::ORANGE_HIGH, dst);
 	} else if(color == ras_cv::YELLOW){
 		cv::inRange(src, ras_cv::YELLOW_LOW, ras_cv::YELLOW_HIGH, dst);
-	} else if(color == ras_cv::RED){
-		cv::inRange(src, ras_cv::RED_LOW, ras_cv::RED_HIGH, dst);
-	} else{
+	} else if(color == ras_cv::RED1){
+		cv::inRange(src, ras_cv::RED_LOW1, ras_cv::RED_HIGH1, dst);
+	} else if(color == ras_cv::RED2){
+		cv::inRange(src, ras_cv::RED_LOW2, ras_cv::RED_HIGH2, dst);
+	}
+	 else{
 		dst = src;
 	}
 

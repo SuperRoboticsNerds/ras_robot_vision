@@ -275,7 +275,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 		cv::cvtColor(thres_img, thres_img_3, CV_GRAY2BGR);
 	}
 
-	cv::Mat t1img[8];
+	cv::Mat t1img[9];
 	int cnt = 0;
 	cv::Mat fin_thres_img;
 	// cv::Mat fin_img;
@@ -605,7 +605,8 @@ int main(int argc, char ** argv){
   	object_colors.push_back(ras_cv::GREEN_FL);
   	object_colors.push_back(ras_cv::BLUE_DARK);
   	object_colors.push_back(ras_cv::BLUE_LIGHT);
-  	object_colors.push_back(ras_cv::RED);
+  	object_colors.push_back(ras_cv::RED1);
+  	object_colors.push_back(ras_cv::RED2);
   	object_colors.push_back(ras_cv::VIOLET);
   	object_colors.push_back(ras_cv::YELLOW);
   	object_colors.push_back(ras_cv::ORANGE);

@@ -29,7 +29,6 @@
 #include <list>
 
 
-
 using namespace std;
 // using namespace cv;
 
@@ -87,7 +86,7 @@ int mask_size_x = 3;
 int mask_size_y = 3;
 
 int min_area = 500;
-int max_area = 9000;
+int max_area = 10500;
 
 bool circular = false;
 bool filter_ratio = false;
@@ -285,7 +284,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 		cv::cvtColor(thres_img, thres_img_3, CV_GRAY2BGR);
 	}
 
-	cv::Mat t1img[8];
+	cv::Mat t1img[9];
 	int cnt = 0;
 	cv::Mat fin_thres_img;
 	// cv::Mat fin_img;
@@ -351,7 +350,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         int shape_index;
 
         if(client_color.call(it)){
-        	if(votelist.size() >= 10){
+        	if(votelist.size() >= 5){
         		for (std::list<int>::const_iterator it = votelist.begin(), end = votelist.end(); it != end; ++it){
         			int index = *it;
         			votes[index]++;
@@ -362,15 +361,15 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         		int col_index = ras_cv::argmax(votes, 7);
         		int maxval = ras_cv::maxval(votes, 7);
 
+        		if(maxval >= 3){
         		while(!votelist.empty()){
         			votelist.pop_back();        				
         		}
 
-        		for(int i =0; i< 7; i++){
-        			votes[i] =0;
+        		for(int j =0; j< 7; j++){
+        			votes[j] =0;
         		}
 
-        		if(maxval >= 7){
 
         			// some color detected yay !!!!!!
         			// publish here ..........
@@ -395,7 +394,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
 	}
 
 	
-  	// cv::imshow(WINDOW_NAME, thres_img);
+  	cv::imshow(WINDOW_NAME, fin_img);
   	cv::waitKey(1);
 
 }
@@ -423,7 +422,9 @@ int main(int argc, char ** argv){
   	object_colors.push_back(ras_cv::GREEN_FL);
   	object_colors.push_back(ras_cv::BLUE_DARK);
   	object_colors.push_back(ras_cv::BLUE_LIGHT);
-  	object_colors.push_back(ras_cv::RED);
+  	object_colors.push_back(ras_cv::RED1);
+  	object_colors.push_back(ras_cv::RED2);
+
   	object_colors.push_back(ras_cv::VIOLET);
   	object_colors.push_back(ras_cv::YELLOW);
   	object_colors.push_back(ras_cv::ORANGE);
@@ -438,8 +439,7 @@ int main(int argc, char ** argv){
 	ros::Subscriber sub_image = node.subscribe("/camera/rgb/image_raw", MAX_BUFFER, tuneCallback);
 
   	client_color = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/color");
-  	client_shape = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/shape");
-  	client_material = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/material");
+  	// client_shape = node.serviceClient<ras_object_lib::Image_Transfer>("/classify_objects/shape");
 
   	object_pub = node.advertise<ras_msgs::Object_id>("/object/color", 1);
   	obj_img_pub = node.advertise<sensor_msgs::Image>("/object/small_img", 1);

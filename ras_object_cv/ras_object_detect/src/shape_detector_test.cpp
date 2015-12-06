@@ -94,7 +94,7 @@ public:
 	int mask_size_y = 3;
 
 	int min_area = 530;
-	int max_area = 9500;
+	int max_area = 10500;
 
 	bool circular = false;
 	bool filter_ratio = false;
@@ -118,13 +118,14 @@ public:
 		depth_img_sub = n.subscribe("/camera/depth/points", 1, &ShapeDetector::pointcl_cb, this);
 		depth_img_sub2 = n.subscribe("/camera/depth_registered/image_raw", 1, &ShapeDetector::depthimg_cb, this);
 
-		img_sub = n.subscribe("/camera/rgb/image_raw", 5, &ShapeDetector::shape_cb, this);
+		img_sub = n.subscribe("/camera/rgb/image_raw", 1, &ShapeDetector::shape_cb, this);
 		shape_pub = n.advertise<ras_msgs::Shape>("/object/shape", 1);
 		object_colors.push_back(ras_cv::GREEN_DARK);
   		object_colors.push_back(ras_cv::GREEN_FL);
   		object_colors.push_back(ras_cv::BLUE_DARK);
   		object_colors.push_back(ras_cv::BLUE_LIGHT);
-  		object_colors.push_back(ras_cv::RED);
+  		object_colors.push_back(ras_cv::RED1);
+  		object_colors.push_back(ras_cv::RED2);
   		object_colors.push_back(ras_cv::VIOLET);
   		object_colors.push_back(ras_cv::YELLOW);
   		object_colors.push_back(ras_cv::ORANGE);
@@ -608,7 +609,7 @@ public:
 		}
 
 
-		cv::Mat t1img[8];
+		cv::Mat t1img[9];
 		int cnt = 0;
 		cv::Mat fin_thres_img;
 		// cv::Mat fin_img;
@@ -638,7 +639,7 @@ public:
 		double ydist = 0.2;
 		cv::Mat dstshape;
 
-		// cv::imshow(WINDOW_NAME, fin_img);
+		cv::imshow(WINDOW_NAME, fin_img);
 
 
 		// hack for testing
