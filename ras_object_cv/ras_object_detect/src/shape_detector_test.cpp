@@ -30,7 +30,7 @@
 #include <vector>
 #include <cmath>
 
-#define LOOP_RATE 10
+#define LOOP_RATE 30
 
 
 using namespace std;
@@ -106,6 +106,8 @@ public:
 	int min_convexity = 15;
 	int min_inertia_ratio = 15;
 
+	bool NO_PUBLISH = false;
+
 	int min_distance_between_blobs= 50;
 	cv::SimpleBlobDetector::Params params;
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1; 
@@ -137,15 +139,18 @@ public:
 	void publishMessage(int shape, double xdist, double ydist, double material){
 		ras_msgs::Shape sid;
 		sid.shape = shape;
+
 		// small hack so that mattias code works seamlessly ...
 		// hacks of life which make life easier....
-
 		sid.x = ydist;
 		sid.y = -xdist;
 		// sid.x = xdist;
 		// sid.y = ydist;
 		sid.material = material;
-		shape_pub.publish(sid);
+		if(!NO_PUBLISH){
+			shape_pub.publish(sid);
+		}
+
 	}
 
 
@@ -479,6 +484,20 @@ public:
 		const pcl::PointXYZ pt3 = cl1->points[(yval-1)*cols + xval];
 		const pcl::PointXYZ pt4 = cl1->points[yval*cols + xval+1];
 		const pcl::PointXYZ pt5 = cl1->points[(yval+1)*cols + xval];
+		const pcl::PointXYZ pt6 = cl1->points[(yval+1)*cols + xval+1];
+		const pcl::PointXYZ pt7 = cl1->points[(yval-1)*cols + xval-1];
+		const pcl::PointXYZ pt8 = cl1->points[(yval-1)*cols + xval+1];
+		const pcl::PointXYZ pt9 = cl1->points[(yval+1)*cols + xval-1];
+		const pcl::PointXYZ pt10 = cl1->points[(yval-2)*cols + xval-1];
+		const pcl::PointXYZ pt11 = cl1->points[(yval-2)*cols + xval];
+		const pcl::PointXYZ pt12 = cl1->points[(yval-2)*cols + xval+1];
+		const pcl::PointXYZ pt13 = cl1->points[(yval+2)*cols + xval-1];
+		const pcl::PointXYZ pt14 = cl1->points[(yval+2)*cols + xval];
+		const pcl::PointXYZ pt15 = cl1->points[(yval+2)*cols + xval+1];
+		
+
+		// const pcl::PointXYZ pt9 = cl1->points[(yval-1)*cols + xval-1];
+
 
 		double xmedian = 0.0;
 		double ymedian = 0.0;
@@ -506,6 +525,46 @@ public:
 		if(!std::isnan(pt5.x)){
 			xvalues.push_back(pt5.x);
 		}
+		
+		if(!std::isnan(pt6.x)){
+			xvalues.push_back(pt6.x);
+		}
+
+		if(!std::isnan(pt7.x)){
+			xvalues.push_back(pt7.x);
+		}
+
+		if(!std::isnan(pt8.x)){
+			xvalues.push_back(pt8.x);
+		}
+
+		if(!std::isnan(pt9.x)){
+			xvalues.push_back(pt9.x);
+		}
+
+		if(!std::isnan(pt10.x)){
+			xvalues.push_back(pt10.x);
+		}
+
+		if(!std::isnan(pt11.x)){
+			xvalues.push_back(pt11.x);
+		}
+
+		if(!std::isnan(pt12.x)){
+			xvalues.push_back(pt12.x);
+		}
+
+		if(!std::isnan(pt13.x)){
+			xvalues.push_back(pt13.x);
+		}
+
+		if(!std::isnan(pt14.x)){
+			xvalues.push_back(pt14.x);
+		}
+
+		if(!std::isnan(pt15.x)){
+			xvalues.push_back(pt15.x);
+		}
 
 
 		if(!std::isnan(pt1.z)){
@@ -528,6 +587,47 @@ public:
 			yvalues.push_back(pt5.z);
 		}
 
+		if(!std::isnan(pt6.z)){
+			yvalues.push_back(pt6.z);
+		}
+
+		if(!std::isnan(pt7.z)){
+			yvalues.push_back(pt7.z);
+		}
+
+		if(!std::isnan(pt8.z)){
+			yvalues.push_back(pt8.z);
+		}
+
+		if(!std::isnan(pt9.z)){
+			yvalues.push_back(pt9.z);
+		}
+
+		if(!std::isnan(pt10.z)){
+			yvalues.push_back(pt10.z);
+		}
+
+		if(!std::isnan(pt11.z)){
+			yvalues.push_back(pt11.z);
+		}
+
+		if(!std::isnan(pt12.z)){
+			yvalues.push_back(pt12.z);
+		}
+
+		if(!std::isnan(pt13.z)){
+			yvalues.push_back(pt13.z);
+		}
+
+		if(!std::isnan(pt14.z)){
+			yvalues.push_back(pt14.z);
+		}
+
+		if(!std::isnan(pt15.z)){
+			yvalues.push_back(pt15.z);
+		}
+
+
 		if(xvalues.size() > 1){
 			std::sort(xvalues.begin(), xvalues.end());
 			xmedian = xvalues[xvalues.size() / 2.];
@@ -540,11 +640,13 @@ public:
 
 
 		xdist = xmedian;
-		double diff = ymedian*ymedian - 0.21*0.21;
+		double diff = ymedian*ymedian - 0.24*0.24;
 		if(diff > 0){
+			NO_PUBLISH= false;
 			ydist = sqrt(diff);
 		}else{
-			ydist = 0.61;
+			ydist = 0.50;
+			NO_PUBLISH = true;
 		}
 		// ydist = sqrt();
 	}
@@ -645,12 +747,12 @@ public:
 		// hack for testing
 		if(global_counter > 12){
 			std::cout << global_counter << "\n";
-			for(int i =0; i < key_points.size(); i++){
-			xval =  key_points[i].pt.x;
-			yval =  key_points[i].pt.y;
-			calculateMedianDist(cl1, pr_img.cols, xval, yval, xdist, ydist);
+			for(int i =0; i <  std::min((int)key_points.size(), 1); i++){
+				xval =  key_points[0].pt.x;
+				yval =  key_points[0].pt.y;
+				calculateMedianDist(cl1, pr_img.cols, xval, yval, xdist, ydist);
 			// ROS_INFO("Distance from center: %f, %f, %f", pt1.x, pt1.y, pt1.z);
-			cv::Mat depth_mask_img;
+				cv::Mat depth_mask_img;
 
 			if(depth_img.rows > 0 && depth_img.cols > 0){
 				depth_mask_img = depth_img(ras_cv::get_bounding_box(key_points[i], pr_img.cols, pr_img.rows, 1.0));

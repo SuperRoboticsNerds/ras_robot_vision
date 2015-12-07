@@ -129,7 +129,7 @@ namespace ras_cv{
 
 	// static const cv::Scalar GREEN_DARK_LOW = cv::Scalar(54, 108, 100);
 	// static const cv::Scalar GREEN_DARK_HIGH = cv::Scalar(65, 155, 140);
-	static const cv::Scalar GREEN_DARK_LOW = cv::Scalar(40, 30, 30);
+	static const cv::Scalar GREEN_DARK_LOW = cv::Scalar(40, 40, 40);
 	static const cv::Scalar GREEN_DARK_HIGH = cv::Scalar(75, 255, 255);
 
 
@@ -156,10 +156,10 @@ namespace ras_cv{
 	// static const cv::Scalar RED_LOW = cv::Scalar(162, 170, 135);
 	// static const cv::Scalar RED_HIGH = cv::Scalar(185, 225, 220);
 
-	static const cv::Scalar RED_LOW1 = cv::Scalar(145, 90, 95);
+	static const cv::Scalar RED_LOW1 = cv::Scalar(145, 110, 115);
 	static const cv::Scalar RED_HIGH1 = cv::Scalar(181, 255, 255);
 
-	static const cv::Scalar RED_LOW2 = cv::Scalar(0, 90, 95);
+	static const cv::Scalar RED_LOW2 = cv::Scalar(0, 110, 125);
 	static const cv::Scalar RED_HIGH2 = cv::Scalar(35, 255, 255);
 
 
