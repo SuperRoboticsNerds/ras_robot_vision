@@ -11,7 +11,7 @@
 #include "std_msgs/String.h"
 
 
-#define LOOP_RATE 10
+#define LOOP_RATE 30
 
 class ObjectInfo{
 
