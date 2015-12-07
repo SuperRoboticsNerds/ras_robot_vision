@@ -237,7 +237,7 @@ public:
 	       }
 
 
-	       if(votelist2.size() >= 8){
+	       if(votelist2.size() >= 3){
 				int finshape = decisionRules(votes2, 7);
 				double area = cv::contourArea(contours[i]);
 				double distance =  1100/area;
@@ -332,7 +332,7 @@ public:
 			// Approximate contour with accuracy proportional
 			// to the contour perimeter
 
-			if(votelist.size() >= 8){
+			if(votelist.size() >= 3){
 				int finshape = decisionRules(votes, 7);
 				double area = cv::contourArea(contours[i]);
 				double distance =  1100/area;
@@ -650,7 +650,6 @@ public:
 		}
 		// ydist = sqrt();
 	}
-
 
 
 
