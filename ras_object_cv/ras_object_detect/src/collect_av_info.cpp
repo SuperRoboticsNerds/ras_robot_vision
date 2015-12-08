@@ -83,7 +83,7 @@ public:
 	void publishEverything(){
 		// time_counter++;
 		// if( )
-		if(obj.x <= 0.45 && time_counter > 15){
+		if(obj.x <= 0.45){
 
 			if(prev_obj_id == obj.object){
 				return;

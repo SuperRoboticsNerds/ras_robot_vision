@@ -351,7 +351,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         int shape_index;
 
         if(client_color.call(it)){
-        	if(votelist.size() >= 10){
+        	if(votelist.size() >= 13){
         		for (std::list<int>::const_iterator it = votelist.begin(), end = votelist.end(); it != end; ++it){
         			int index = *it;
         			votes[index]++;
@@ -362,7 +362,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         		int col_index = ras_cv::argmax(votes, 7);
         		int maxval = ras_cv::maxval(votes, 7);
 
-        		if(maxval >= 7){
+        		if(maxval >= 9){
         		while(!votelist.empty()){
         			votelist.pop_back();        				
         		}
