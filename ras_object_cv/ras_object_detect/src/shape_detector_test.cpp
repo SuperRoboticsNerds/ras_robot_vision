@@ -131,7 +131,6 @@ public:
   		object_colors.push_back(ras_cv::VIOLET);
   		object_colors.push_back(ras_cv::YELLOW);
   		object_colors.push_back(ras_cv::ORANGE);
-
 	}
 
 
@@ -150,8 +149,8 @@ public:
 		if(!NO_PUBLISH){
 			shape_pub.publish(sid);
 		}
-
 	}
+
 
 
 	ras_object_lib::Depth_Transfer  transferDepth(double ratio, double distance){
@@ -177,6 +176,7 @@ public:
 		cv::rectangle(im, pt + cv::Point(0, baseline), pt + cv::Point(text.width, -text.height), CV_RGB(255,255,255), CV_FILLED);
 		cv::putText(im, label, pt, fontface, scale, CV_RGB(0,0,0), thickness, 8);
 	}
+
 
 
 
@@ -641,6 +641,8 @@ public:
 
 		xdist = xmedian;
 		double diff = ymedian*ymedian - 0.24*0.24;
+		
+		diff = ymedian*ymedian - xmedian*xmedian;
 		if(diff > 0){
 			NO_PUBLISH= false;
 			ydist = sqrt(diff);
@@ -788,7 +790,7 @@ public:
 	}
 		
   	// cv::imshow(WINDOW_NAME, thres_img);
-  		cv::waitKey(1);
+	cv::waitKey(1);
 
 	}
 

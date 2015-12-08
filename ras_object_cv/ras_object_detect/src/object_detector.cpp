@@ -205,6 +205,7 @@ int decisiontree(int color_index, int shape_index ){
 
 
 
+
 void depthCallback(const sensor_msgs::ImageConstPtr& depthimg){
 	ras_cv::to_cv_copy_depth(ros_depth_img, depthimg);
 
@@ -350,7 +351,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         int shape_index;
 
         if(client_color.call(it)){
-        	if(votelist.size() >= 5){
+        	if(votelist.size() >= 10){
         		for (std::list<int>::const_iterator it = votelist.begin(), end = votelist.end(); it != end; ++it){
         			int index = *it;
         			votes[index]++;
@@ -361,7 +362,7 @@ void  tuneCallback(const sensor_msgs::ImageConstPtr& inimg){
         		int col_index = ras_cv::argmax(votes, 7);
         		int maxval = ras_cv::maxval(votes, 7);
 
-        		if(maxval >= 3){
+        		if(maxval >= 7){
         		while(!votelist.empty()){
         			votelist.pop_back();        				
         		}

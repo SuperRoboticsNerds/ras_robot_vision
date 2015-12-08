@@ -34,6 +34,7 @@ public:
 	int group_num = 8;
 	std_msgs::String message;
 	ras_msgs::RAS_Evidence evidence;
+	int prev_obj_id = 1000;
 	
 	
 	ObjectInfo(){
@@ -77,15 +78,23 @@ public:
 		// decisionRule(color_code, shape_code);
 	}
 
-
 	void publishEverything(){
-		speech_publish.publish(message);
-		obj_publish.publish(obj);
-		ras_evidence_publish.publish(evidence);
+		// if( )
+
+		if(obj.x <= 0.50){
+
+			if(prev_obj_id == obj.object){
+				return;
+			}
+			speech_publish.publish(message);
+			ras_evidence_publish.publish(evidence);
+			obj_publish.publish(obj);
+			prev_obj_id = obj.object;
+
+
+		}
 
 	}
-
-
 
 
 	void decisionRule(int color_id, int shape_id){
@@ -97,7 +106,16 @@ public:
 		obj.x = x_pos;
 		obj.y = y_pos;
 		
-		ros::Time begin = ros::Time::now();		
+		ros::Time begin = ros::Time::now();	
+
+		if(color_id == 99){
+			object_id = 100;
+			obj_id = "An object";
+			evidence.object_id = obj_id;	
+			publishEverything();
+			return;	
+		}	
+
 
 		if(color_id == 2 && shape_id != 2){
 			object_id = 8;
@@ -105,6 +123,7 @@ public:
 			obj_id = "Blue Triangle";
 			evidence.object_id = obj_id;
 			obj.object = object_id;
+			// evidence.
 			publishEverything();
 			return;
 
