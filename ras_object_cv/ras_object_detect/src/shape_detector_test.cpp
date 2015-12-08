@@ -52,10 +52,8 @@ public:
 	cv::Mat small_img;
 	std::list<int> votelist;
 	std::list<int> votelist2;
-	std::list<int> mat_votes_list;
 	int votes[7]={0};
 	int votes2[7]={0};
-	int matvotes[2]={0};
 	ros::Publisher shape_pub;
 	ros::Subscriber img_sub;
 	ros::Subscriber depth_img_sub;
@@ -213,7 +211,6 @@ public:
 
 
 
-
 	void detectShapes(cv::Mat box_img, cv::Mat &dst, double &xdist, double & ydist, double &material){
 		cv::Mat bw_img;
 		int threshold1 = 30;
@@ -240,7 +237,7 @@ public:
 	       }
 
 
-	       if(votelist2.size() >= 4){
+	       if(votelist2.size() >= 3){
 				int finshape = decisionRules(votes2, 7);
 				double area = cv::contourArea(contours[i]);
 				double distance =  1100/area;
@@ -459,7 +456,6 @@ public:
 	}
 
 
-
 	void pointcl_cb(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& cloud_msg){
 		global_counter++;
 
@@ -480,7 +476,6 @@ public:
 	void depthimg_cb(const sensor_msgs::Image::ConstPtr& img){
 		ras_cv::to_cv_copy_depth(depth_img, img);
 	}
-
 
 
 	void calculateMedianDist(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cl1, int cols, float xval, float yval, double &xdist, double &ydist){
@@ -769,25 +764,15 @@ public:
         		double depth = std::get<1>(nan_ratio);
 
         		ras_object_lib::Depth_Transfer  dt = transferDepth(ratio, depth);
+        		client_material.call(dt);
+        		std::string material_type;
+        		material_type = dt.response.str;
+        		double mat_type;
 
-
-       			if(client_color.call(dt)){
-        			if(mat_votes_list.size() >= 6){
-        				for (std::list<int>::const_iterator it = mat_votes_list.begin(), end = mat_votes_list.end(); it != end; ++it){
-        					int index = *it;
-        					matvotes[index]++;
-        				}
-        		
-	        			if(matvotes[0] < matvotes[1]){
-	        				mat_type = 1;
-	        			}else{
-	        				mat_type = 0;
-	        			}
-
-        			}
-
-        			int number = atoi(dt.response.str.c_str());
-        			mat_votes_list.push_back(number);    	
+        		if(material_type == "1"){
+        			mat_type = 1;
+        		}else{
+        			mat_type = 0;
         		}
 
 

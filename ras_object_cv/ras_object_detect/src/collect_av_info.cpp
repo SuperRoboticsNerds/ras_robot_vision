@@ -81,14 +81,14 @@ public:
 
 
 	void publishEverything(){
-		time_counter++;
+		// time_counter++;
 		// if( )
-		if(obj.x <= 0.45 && time_counter > 90){
+		if(obj.x <= 0.45 && time_counter > 15){
 
 			if(prev_obj_id == obj.object){
 				return;
 			}
-			speech_publish.publish(message);
+			// speech_publish.publish(message);
 			ras_evidence_publish.publish(evidence);
 			obj_publish.publish(obj);
 			prev_obj_id = obj.object;
