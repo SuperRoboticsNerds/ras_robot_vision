@@ -28,8 +28,8 @@ public:
 	int object_id;
 	float material;
 	ras_msgs::Object_id obj;
-	double x_pos;
-	double y_pos;
+	double x_pos = 0;
+	double y_pos = 0;
 	std::string obj_id;
 	int group_num = 8;
 	std_msgs::String message;
@@ -76,6 +76,15 @@ public:
 		x_pos = shape_msg.x;
 		y_pos = shape_msg.y;
 		material = shape_msg.material;
+		if(x_pos < 0.1){
+			x_pos = 0;
+		}
+		if(y_pos < 0.002){
+			y_pos = 0;
+		}
+		if(material !=0 || material != 1){
+			material = 1;
+		}
 		// decisionRule(color_code, shape_code);
 	}
 
@@ -83,11 +92,11 @@ public:
 	void publishEverything(){
 		// time_counter++;
 		// if( )
-		if(obj.x <= 0.45){
+		if(obj.x <= 0.65){
 
-			if(prev_obj_id == obj.object){
-				return;
-			}
+			// if(prev_obj_id == obj.object){
+			// 	// return;
+			// }
 			// speech_publish.publish(message);
 			ras_evidence_publish.publish(evidence);
 			obj_publish.publish(obj);

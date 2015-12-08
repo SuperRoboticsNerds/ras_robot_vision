@@ -640,7 +640,7 @@ public:
 
 
 		xdist = xmedian;
-		double diff = ymedian*ymedian - 0.24*0.24;
+		double diff = ymedian*ymedian - 0.21*0.21;
 		
 		diff = ymedian*ymedian - xmedian*xmedian;
 		if(diff > 0){
