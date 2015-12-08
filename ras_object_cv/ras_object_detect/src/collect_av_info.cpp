@@ -35,6 +35,7 @@ public:
 	std_msgs::String message;
 	ras_msgs::RAS_Evidence evidence;
 	int prev_obj_id = 1000;
+	int time_counter =0;
 	
 	
 	ObjectInfo(){
@@ -78,10 +79,11 @@ public:
 		// decisionRule(color_code, shape_code);
 	}
 
-	void publishEverything(){
-		// if( )
 
-		if(obj.x <= 0.50){
+	void publishEverything(){
+		time_counter++;
+		// if( )
+		if(obj.x <= 0.45 && time_counter > 90){
 
 			if(prev_obj_id == obj.object){
 				return;
@@ -90,11 +92,11 @@ public:
 			ras_evidence_publish.publish(evidence);
 			obj_publish.publish(obj);
 			prev_obj_id = obj.object;
-
-
+			time_counter = 0;
 		}
 
 	}
+
 
 
 	void decisionRule(int color_id, int shape_id){
